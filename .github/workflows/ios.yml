@@ -24,6 +24,9 @@ jobs:
       - name: Configurar Gradle
         uses: gradle/actions/setup-gradle@v3
 
+      - name: Dar permisos de ejecucion a gradlew
+        run: chmod +x gradlew
+
       - name: Compilar Framework KMP de iOS
         run: ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64
 
