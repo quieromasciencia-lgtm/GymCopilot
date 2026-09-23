@@ -30,8 +30,20 @@ jobs:
       - name: Compilar Framework KMP de iOS
         run: ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64
 
-      - name: Subir artefacto KMP
+      - name: Subir artefacto KMP Framework
         uses: actions/upload-artifact@v4
         with:
           name: shared-framework-ios
           path: shared/build/bin/iosSimulatorArm64/debugFramework/
+
+      - name: Compilar App de iOS (.app) para Appetize.io
+        run: |
+          xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Debug -sdk iphonesimulator -derivedDataPath iosApp/build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+          cd iosApp/build/Build/Products/Debug-iphonesimulator
+          zip -r ../../../../GymCopilot-Appetize.zip iosApp.app
+
+      - name: Subir Paquete (.app.zip) para Appetize.io
+        uses: actions/upload-artifact@v4
+        with:
+          name: GymCopilot-Appetize-iOS
+          path: GymCopilot-Appetize.zip
