@@ -10,22 +10,7 @@
 		75A100012A00000100000001 /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75A100022A00000100000001 /* iOSApp.swift */; };
 		75A100032A00000100000001 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75A100042A00000100000001 /* ContentView.swift */; };
 		75A100052A00000100000001 /* shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A100062A00000100000001 /* shared.framework */; };
-		75A100562A00000100000001 /* shared.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 75A100062A00000100000001 /* shared.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		75A100552A00000100000001 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				75A100562A00000100000001 /* shared.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		75A100022A00000100000001 /* iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSApp.swift; sourceTree = "<group>"; };
@@ -91,7 +76,6 @@
 			buildPhases = (
 				75A100402A00000100000001 /* Sources */,
 				75A100092A00000100000001 /* Frameworks */,
-				75A100552A00000100000001 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -263,7 +247,9 @@
 		75A100802A00000100000001 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../shared/build/bin/iosSimulatorArm64/debugFramework",
@@ -284,7 +270,9 @@
 		75A100812A00000100000001 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../shared/build/bin/iosSimulatorArm64/debugFramework",
