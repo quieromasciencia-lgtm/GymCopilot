@@ -1,0 +1,34 @@
+name: Compilar iOS (GymCopilot KMP)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout del proyecto
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Configurar Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Compilar Framework KMP de iOS
+        run: ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64
+
+      - name: Subir artefacto KMP
+        uses: actions/upload-artifact@v4
+        with:
+          name: shared-framework-ios
+          path: shared/build/bin/iosSimulatorArm64/debugFramework/
