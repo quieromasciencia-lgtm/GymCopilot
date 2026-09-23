@@ -38,7 +38,7 @@ jobs:
 
       - name: Compilar App de iOS (.app) para Appetize.io
         run: |
-          xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Debug -sdk iphonesimulator -derivedDataPath iosApp/build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+          xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Debug -sdk iphonesimulator -arch arm64 -derivedDataPath iosApp/build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
           cd iosApp/build/Build/Products/Debug-iphonesimulator
           zip -r ../../../../GymCopilot-Appetize.zip iosApp.app
 
