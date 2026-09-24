@@ -27,8 +27,11 @@ jobs:
       - name: Dar permisos de ejecucion a gradlew
         run: chmod +x gradlew
 
-      - name: Compilar Framework KMP de iOS
+      - name: Compilar KMP Framework para Simulador (iosSimulatorArm64)
         run: ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64
+
+      - name: Compilar KMP Framework para Dispositivo Real (iosArm64)
+        run: ./gradlew :shared:linkReleaseFrameworkIosArm64
 
       - name: Subir artefacto KMP Framework
         uses: actions/upload-artifact@v4
@@ -47,3 +50,16 @@ jobs:
         with:
           name: GymCopilot-Appetize-iOS
           path: GymCopilot-Appetize.zip
+
+      - name: Generar Archivo Instalable iOS (.ipa)
+        run: |
+          xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Release -sdk iphoneos archive -archivePath iosApp/build/iosApp.xcarchive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+          mkdir -p Payload
+          cp -r iosApp/build/iosApp.xcarchive/Products/Applications/iosApp.app Payload/
+          zip -r GymCopilot-iOS.ipa Payload
+
+      - name: Subir Archivo Instalable (.ipa)
+        uses: actions/upload-artifact@v4
+        with:
+          name: GymCopilot-iOS-IPA
+          path: GymCopilot-iOS.ipa
