@@ -41,8 +41,8 @@ jobs:
 
       - name: Compilar App de iOS (.app) para Appetize.io
         run: |
-          xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Debug -sdk iphonesimulator -arch arm64 ONLY_ACTIVE_ARCH=YES -derivedDataPath iosApp/build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
-          cd iosApp/build/Build/Products/Debug-iphonesimulator
+          xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Debug -sdk iphonesimulator -arch arm64 ONLY_ACTIVE_ARCH=YES -derivedDataPath iosApp/build-sim CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+          cd iosApp/build-sim/Build/Products/Debug-iphonesimulator
           zip -r ../../../../GymCopilot-Appetize.zip iosApp.app
 
       - name: Subir Paquete (.app.zip) para Appetize.io
@@ -53,8 +53,8 @@ jobs:
 
       - name: Generar Archivo Instalable iOS (.ipa)
         run: |
-          xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Release -sdk iphoneos -derivedDataPath iosApp/build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
-          cd iosApp/build/Build/Products/Release-iphoneos
+          xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Release -sdk iphoneos -derivedDataPath iosApp/build-ipa CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+          cd iosApp/build-ipa/Build/Products/Release-iphoneos
           mkdir -p Payload
           cp -r iosApp.app Payload/
           zip -r ../../../../GymCopilot-iOS.ipa Payload
