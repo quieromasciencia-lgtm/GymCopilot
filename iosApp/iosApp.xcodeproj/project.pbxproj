@@ -10,7 +10,7 @@
 		75A100012A00000100000001 /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75A100022A00000100000001 /* iOSApp.swift */; };
 		75A100032A00000100000001 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75A100042A00000100000001 /* ContentView.swift */; };
 		75A100052A00000100000001 /* shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A100062A00000100000001 /* shared.framework */; };
-		75A100562A00000100000001 /* shared.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 75A100062A00000100000001 /* shared.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		75A100562A00000100000001 /* shared.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 75A100062A00000100000001 /* shared.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
