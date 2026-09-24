@@ -23,7 +23,7 @@ kotlin {
     targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
         binaries.framework {
             baseName = "shared"
-            isStatic = true
+            isStatic = false
         }
     }
 
