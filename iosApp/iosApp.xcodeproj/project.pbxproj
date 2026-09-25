@@ -265,9 +265,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = arm64;
-				CODE_SIGNING_ALLOWED = NO;
-				CODE_SIGNING_REQUIRED = NO;
-				CODE_SIGN_IDENTITY = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../shared/build/bin/iosSimulatorArm64/debugFramework",
@@ -290,9 +287,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = arm64;
-				CODE_SIGNING_ALLOWED = NO;
-				CODE_SIGNING_REQUIRED = NO;
-				CODE_SIGN_IDENTITY = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../shared/build/bin/iosArm64/releaseFramework",
