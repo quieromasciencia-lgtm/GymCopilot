@@ -46,6 +46,8 @@ jobs:
 
       - name: Compilar App de iOS (.app) para Appetize.io
         run: |
+          mkdir -p iosApp/build-sim/Build/Products/Debug-iphonesimulator
+          cp -R shared/build/bin/iosSimulatorArm64/debugFramework/shared.framework iosApp/build-sim/Build/Products/Debug-iphonesimulator/
           cp -R shared/build/bin/iosSimulatorArm64/debugFramework/shared.framework iosApp/
           xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath iosApp/build-sim CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
           cd iosApp/build-sim/Build/Products/Debug-iphonesimulator
@@ -79,6 +81,8 @@ jobs:
 
       - name: Generar Archivo Instalable iOS (.ipa)
         run: |
+          mkdir -p iosApp/build-ipa/Build/Products/Release-iphoneos
+          cp -R shared/build/bin/iosArm64/releaseFramework/shared.framework iosApp/build-ipa/Build/Products/Release-iphoneos/
           cp -R shared/build/bin/iosArm64/releaseFramework/shared.framework iosApp/
           if [ -n "$BUILD_CERTIFICATE_BASE64" ]; then
             echo "==== Compilando y Firmando .ipa con certificado para Dispositivo Real (Kobiton) ===="
