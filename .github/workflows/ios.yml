@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configurar Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -46,7 +46,7 @@ jobs:
 
       - name: Compilar App de iOS (.app) para Appetize.io
         run: |
-          xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Debug -sdk iphonesimulator -arch arm64 ONLY_ACTIVE_ARCH=YES -derivedDataPath iosApp/build-sim CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+          xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath iosApp/build-sim CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
           cd iosApp/build-sim/Build/Products/Debug-iphonesimulator
           zip -r ../../../../GymCopilot-Appetize.zip iosApp.app
 
@@ -80,7 +80,7 @@ jobs:
         run: |
           if [ -n "$BUILD_CERTIFICATE_BASE64" ]; then
             echo "==== Compilando y Firmando .ipa con certificado para Dispositivo Real (Kobiton) ===="
-            xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Release -sdk iphoneos -derivedDataPath iosApp/build-ipa CODE_SIGNING_ALLOWED=YES
+            xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath iosApp/build-ipa CODE_SIGNING_ALLOWED=YES
             
             EXP_IDENTITY=$(security find-identity -v -p codesigning $RUNNER_TEMP/app-signing.keychain-db | head -n 1 | awk -F '"' '{print $2}')
             echo "Identidad de firma encontrada: $EXP_IDENTITY"
@@ -95,7 +95,7 @@ jobs:
             zip -r ../../../../GymCopilot-iOS.ipa Payload
           else
             echo "==== AVISO: Secrets de firma no detectados. Generando .ipa no firmado (Solo Simulador/Appetize) ===="
-            xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Release -sdk iphoneos -derivedDataPath iosApp/build-ipa CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+            xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath iosApp/build-ipa CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
             cd iosApp/build-ipa/Build/Products/Release-iphoneos
             mkdir -p Payload
             cp -r iosApp.app Payload/
