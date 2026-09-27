@@ -46,6 +46,7 @@ jobs:
 
       - name: Compilar App de iOS (.app) para Appetize.io
         run: |
+          cp -R shared/build/bin/iosSimulatorArm64/debugFramework/shared.framework iosApp/
           xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath iosApp/build-sim CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
           cd iosApp/build-sim/Build/Products/Debug-iphonesimulator
           zip -r ../../../../GymCopilot-Appetize.zip iosApp.app
@@ -78,6 +79,7 @@ jobs:
 
       - name: Generar Archivo Instalable iOS (.ipa)
         run: |
+          cp -R shared/build/bin/iosArm64/releaseFramework/shared.framework iosApp/
           if [ -n "$BUILD_CERTIFICATE_BASE64" ]; then
             echo "==== Compilando y Firmando .ipa con certificado para Dispositivo Real (Kobiton) ===="
             xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath iosApp/build-ipa CODE_SIGNING_ALLOWED=YES
