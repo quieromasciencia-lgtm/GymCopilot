@@ -51,7 +51,7 @@ jobs:
           cp -R shared/build/bin/iosSimulatorArm64/debugFramework/shared.framework iosApp/
           xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath iosApp/build-sim CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
           cd iosApp/build-sim/Build/Products/Debug-iphonesimulator
-          zip -r ../../../../GymCopilot-Appetize.zip iosApp.app
+          zip -r "$GITHUB_WORKSPACE/GymCopilot-Appetize.zip" iosApp.app
 
       - name: Subir Paquete (.app.zip) para Appetize.io
         uses: actions/upload-artifact@v4
@@ -98,14 +98,14 @@ jobs:
             cd iosApp/build-ipa/Build/Products/Release-iphoneos
             mkdir -p Payload
             cp -r iosApp.app Payload/
-            zip -r ../../../../GymCopilot-iOS.ipa Payload
+            zip -r "$GITHUB_WORKSPACE/GymCopilot-iOS.ipa" Payload
           else
             echo "==== AVISO: Secrets de firma no detectados. Generando .ipa no firmado (Solo Simulador/Appetize) ===="
             xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath iosApp/build-ipa CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
             cd iosApp/build-ipa/Build/Products/Release-iphoneos
             mkdir -p Payload
             cp -r iosApp.app Payload/
-            zip -r ../../../../GymCopilot-iOS.ipa Payload
+            zip -r "$GITHUB_WORKSPACE/GymCopilot-iOS.ipa" Payload
           fi
 
       - name: Subir Archivo Instalable (.ipa)
