@@ -1,4 +1,4 @@
-package com.zexo.gymcopilot.network
+package com.zexo.gymcopilot.shared.network
 
 import com.zexo.gymcopilot.model.SubscriptionPlan
 import kotlinx.serialization.SerialName

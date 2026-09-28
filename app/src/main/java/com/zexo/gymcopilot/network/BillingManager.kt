@@ -18,7 +18,11 @@ class BillingManager(private val context: Context) {
                 }
             }
         }
-        .enablePendingPurchases()
+        .enablePendingPurchases(
+            PendingPurchasesParams.newBuilder()
+                .enableOneTimeProducts()
+                .build()
+        )
         .build()
 
     private val _isSubscribed = MutableStateFlow(false)
@@ -90,8 +94,10 @@ class BillingManager(private val context: Context) {
             .setProductList(productList)
             .build()
 
-        billingClient.queryProductDetailsAsync(params) { billingResult, productDetailsList ->
-            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && productDetailsList.isNotEmpty()) {
+        billingClient.queryProductDetailsAsync(params) { billingResult, result ->
+            @Suppress("CAST_NEVER_SUCCEEDS")
+            val productDetailsList = (result as ProductDetailsResult).productDetailsList
+            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && !productDetailsList.isNullOrEmpty()) {
                 val productDetails = productDetailsList[0]
                 val offerToken = productDetails.subscriptionOfferDetails?.get(0)?.offerToken ?: ""
                 

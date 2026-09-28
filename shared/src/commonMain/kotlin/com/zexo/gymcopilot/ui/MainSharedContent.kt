@@ -18,12 +18,50 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zexo.gymcopilot.shared.network.GymKtorApiClient
 import kotlinx.coroutines.delay
 
 enum class AppScreenState {
     SPLASH,
     LOGIN,
     MAIN_APP
+}
+
+@Composable
+fun RoleCard(
+    title: String,
+    description: String,
+    iconEmoji: String,
+    accentColor: Color,
+    onClick: () -> Unit
+) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = SurfaceColor),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+    ) {
+        Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                color = accentColor.copy(alpha = 0.15f),
+                shape = CircleShape,
+                modifier = Modifier.size(50.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(text = iconEmoji, fontSize = 24.sp)
+                }
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(text = title, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                Text(text = description, fontSize = 12.sp, color = TextGray)
+            }
+        }
+    }
 }
 
 @Composable
@@ -60,6 +98,7 @@ fun SharedGymCopilotApp(
                     MainAppView(
                         gymName = gymName,
                         userRole = currentRole,
+                        apiClient = GymKtorApiClient,
                         onChangeRole = { screenState = AppScreenState.LOGIN }
                     )
                 }
@@ -74,7 +113,7 @@ fun SplashScreenView(
     onTimeout: () -> Unit
 ) {
     LaunchedEffect(Unit) {
-        delay(2200)
+        delay(2000)
         onTimeout()
     }
 
@@ -241,6 +280,7 @@ fun LoginScreenView(
 fun MainAppView(
     gymName: String,
     userRole: String,
+    apiClient: GymKtorApiClient,
     onChangeRole: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(0) }
@@ -272,9 +312,9 @@ fun MainAppView(
                 .padding(horizontal = 16.dp)
         ) {
             when (userRole) {
-                "admin" -> AdminView(tab = selectedTab)
-                "profesor" -> ProfessorView(tab = selectedTab)
-                else -> MemberView(tab = selectedTab)
+                "admin" -> AdminFullDashboard(apiClient = apiClient, currentTab = selectedTab, onNavigate = {})
+                "profesor" -> ProfessorFullDashboard(apiClient = apiClient, currentTab = selectedTab, onNavigate = {})
+                else -> MemberFullDashboard(apiClient = apiClient, currentTab = selectedTab, onNavigate = {})
             }
         }
     }
@@ -434,282 +474,6 @@ fun RoleNavigationBar(
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun AdminView(tab: Int) {
-    when (tab) {
-        0 -> {
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
-                item {
-                    Text(
-                        text = "Panel del Administrador",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextWhite,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-                }
-
-                item {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        StatCard(
-                            title = "Socios Activos",
-                            value = "142",
-                            subtitle = "+12 este mes",
-                            accentColor = PrimaryTurquoise,
-                            modifier = Modifier.weight(1f)
-                        )
-                        StatCard(
-                            title = "Asistencia Hoy",
-                            value = "38",
-                            subtitle = "85% concurrencia",
-                            accentColor = AccentOrange,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Text(
-                        text = "Lista de Socios y Asistencia",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextWhite,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                }
-
-                item {
-                    MemberCard("Juan Carlos Pérez", "Pase Libre Gold", "ACTIVO", "Hoy 08:30 AM", true)
-                    MemberCard("María Florencia Gómez", "Musculación 3x", "ACTIVO", "Hoy 10:15 AM", true)
-                    MemberCard("Carlos Alberto López", "Pase Libre", "VENCIDO", "Hace 3 días", false)
-                    MemberCard("Ana Laura Torres", "Crossfit VIP", "ACTIVO", "Ayer 18:00 PM", true)
-                }
-            }
-        }
-        1 -> StoreView(tab = 0)
-        2 -> {
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
-                item {
-                    Text(text = "Clientes / Socios del Gimnasio", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-                item {
-                    MemberCard("Juan Carlos Pérez", "Pase Libre Gold", "ACTIVO", "Hoy 08:30 AM", true)
-                    MemberCard("María Florencia Gómez", "Musculación 3x", "ACTIVO", "Hoy 10:15 AM", true)
-                    MemberCard("Carlos Alberto López", "Pase Libre", "VENCIDO", "Hace 3 días", false)
-                    MemberCard("Ana Laura Torres", "Crossfit VIP", "ACTIVO", "Ayer 18:00 PM", true)
-                    MemberCard("Lucas Martínez", "Pase Mensual", "ACTIVO", "Hoy 07:00 AM", true)
-                    MemberCard("Sofia Benítez", "Musculación 2x", "VENCIDO", "Hace 5 días", false)
-                }
-            }
-        }
-        3 -> {
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
-                item {
-                    Text(text = "Profesores / Entrenadores", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-                item {
-                    MemberCard("Prof. Gabriel Fernández", "Musculación & Personalizado", "ACTIVO", "Hoy 07:00 AM", true)
-                    MemberCard("Prof. Laura Benítez", "Yoga & Mobility", "ACTIVO", "Hoy 09:30 AM", true)
-                    MemberCard("Prof. Roberto Carlos", "Crossfit & Funcional", "ACTIVO", "Ayer 17:00 PM", true)
-                }
-            }
-        }
-        else -> {
-            Column(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
-                Text(text = "Configuración del Gimnasio", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
-                Spacer(modifier = Modifier.height(16.dp))
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = SurfaceColor),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = "🌐 Red Wi-Fi para Asistencia Automática", fontWeight = FontWeight.Bold, color = PrimaryTurquoise)
-                        Text(text = "SSID: GymCopilot_VIP_5G", color = TextWhite, fontSize = 14.sp)
-                    }
-                }
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = SurfaceColor),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = "☁️ Sincronización Google Sheets Ktor API", fontWeight = FontWeight.Bold, color = PrimaryTurquoise)
-                        Text(text = "Estado: Conectado y Sincronizado", color = TextWhite, fontSize = 14.sp)
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ProfessorView(tab: Int) {
-    when (tab) {
-        0 -> {
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
-                item {
-                    Text(text = "Panel de Entrenamiento - Profesor", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-                item {
-                    ClassScheduleCard("Musculación Guiada", "Usted", "09:00 - 11:00", "18 Alumnos")
-                    ClassScheduleCard("Crossfit Avanzado", "Usted", "17:00 - 18:30", "14 Alumnos")
-                }
-            }
-        }
-        1 -> StoreView(tab = 0)
-        2 -> {
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
-                item {
-                    Text(text = "Horarios de Clases", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-                item {
-                    ClassScheduleCard("Crossfit Intensivo", "Prof. Roberto", "08:00 - 09:00", "15/15 Cupos")
-                    ClassScheduleCard("Yoga & Mobility", "Prof. Laura", "10:00 - 11:00", "8/12 Cupos")
-                    ClassScheduleCard("Spinning Power", "Prof. Marcos", "18:00 - 19:00", "20/20 Cupos")
-                }
-            }
-        }
-        3 -> {
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
-                item {
-                    Text(text = "Mis Alumnos Asignados", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-                item {
-                    MemberCard("Juan Carlos Pérez", "Clase 09:00", "PRESENTE", "Hoy 08:55 AM", true)
-                    MemberCard("María Florencia Gómez", "Clase 09:00", "PRESENTE", "Hoy 09:02 AM", true)
-                    MemberCard("Lucas Martínez", "Clase 09:00", "AUSENTE", "Sin registro", false)
-                }
-            }
-        }
-        4 -> {
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
-                item {
-                    Text(text = "Gestión de Rutinas", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-                item {
-                    RoutineCard("Sentadilla Libre con Barra", "4", "10", "90 seg", false) {}
-                    RoutineCard("Press de Banca Plano", "4", "12", "90 seg", false) {}
-                    RoutineCard("Remo con Barra T", "3", "12", "60 seg", false) {}
-                }
-            }
-        }
-        else -> {
-            Column(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
-                Text(text = "Chat de Soporte y Alumnos", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
-                Spacer(modifier = Modifier.height(16.dp))
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = SurfaceColor),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = "💬 Chat con Alumnos", fontWeight = FontWeight.Bold, color = PrimaryTurquoise)
-                        Text(text = "Sin mensajes pendientes", color = TextGray, fontSize = 14.sp)
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun MemberView(tab: Int) {
-    var ex1 by remember { mutableStateOf(true) }
-    var ex2 by remember { mutableStateOf(false) }
-    var ex3 by remember { mutableStateOf(false) }
-    var ex4 by remember { mutableStateOf(false) }
-
-    when (tab) {
-        0 -> {
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
-                item {
-                    Text(text = "Mi Rutina de Hoy: Hipertrofia Pecho y Tríceps", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextWhite)
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-                item {
-                    RoutineCard("Press Inclinado con Mancuernas", "4", "10 - 12", "90 seg", ex1) { ex1 = !ex1 }
-                    RoutineCard("Aperturas en Polea Alta", "3", "15", "60 seg", ex2) { ex2 = !ex2 }
-                    RoutineCard("Fondos en Paralelas", "4", "10", "90 seg", ex3) { ex3 = !ex3 }
-                    RoutineCard("Extensión de Tríceps Polea", "3", "12 - 15", "60 seg", ex4) { ex4 = !ex4 }
-                }
-            }
-        }
-        1 -> StoreView(tab = 0)
-        2 -> {
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
-                item {
-                    Text(text = "Horarios y Reserva de Clases", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-                item {
-                    ClassScheduleCard("Crossfit Intensivo", "Prof. Roberto", "08:00 - 09:00", "15/15 Cupos")
-                    ClassScheduleCard("Yoga & Mobility", "Prof. Laura", "10:00 - 11:00", "8/12 Cupos")
-                    ClassScheduleCard("Spinning Power", "Prof. Marcos", "18:00 - 19:00", "20/20 Cupos")
-                }
-            }
-        }
-        3 -> {
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
-                item {
-                    Text(text = "Mis Rutinas Guardadas", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-                item {
-                    RoutineCard("Press Inclinado con Mancuernas", "4", "10 - 12", "90 seg", ex1) { ex1 = !ex1 }
-                    RoutineCard("Aperturas en Polea Alta", "3", "15", "60 seg", ex2) { ex2 = !ex2 }
-                    RoutineCard("Fondos en Paralelas", "4", "10", "90 seg", ex3) { ex3 = !ex3 }
-                    RoutineCard("Extensión de Tríceps Polea", "3", "12 - 15", "60 seg", ex4) { ex4 = !ex4 }
-                }
-            }
-        }
-        else -> {
-            Column(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
-                Text(text = "Chat y Asistencia", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
-                Spacer(modifier = Modifier.height(16.dp))
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = SurfaceColor),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = "💬 Chat con el Gimnasio", fontWeight = FontWeight.Bold, color = PrimaryTurquoise)
-                        Text(text = "Conectado", color = TextGray, fontSize = 14.sp)
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun StoreView(tab: Int) {
-    LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
-        item {
-            Text(text = "Tienda & Productos del Gimnasio", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
-            Spacer(modifier = Modifier.height(12.dp))
-        }
-        item {
-            ProductCard("Whey Protein Isolate 1kg", "Suplementación", "$45.000")
-            ProductCard("Creatina Monohidratada 300g", "Suplementación", "$38.000")
-            ProductCard("Shaker Térmico GymCopilot", "Accesorios", "$12.500")
-            ProductCard("Remera OverSize GymCopilot", "Indumentaria", "$22.000")
-            ProductCard("Plan Pase Libre Mensual", "Membresía", "$35.000 / mes")
-            ProductCard("Plan Trimestral Promocional", "Membresía", "$90.000 total")
         }
     }
 }

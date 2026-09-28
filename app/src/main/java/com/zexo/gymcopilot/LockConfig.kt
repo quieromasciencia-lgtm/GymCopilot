@@ -10,7 +10,7 @@ object LockConfig {
      * 1+: Días permitidos antes de solicitar el código de desbloqueo.
      * Número negativo (ej. -1): Bloqueo inmediato al ingresar por primera vez.
      */
-    const val LOCK_DAYS = 15
+    const val LOCK_DAYS = 0
 
     /**
      * Define si el sistema de bloqueo de perfil está activo.

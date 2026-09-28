@@ -6,7 +6,7 @@ import com.google.gson.JsonElement
 import com.zexo.gymcopilot.DataStoreManager
 import com.zexo.gymcopilot.model.*
 import com.zexo.gymcopilot.network.*
-import com.zexo.gymcopilot.network.GymKtorApiClient
+import com.zexo.gymcopilot.shared.network.GymKtorApiClient
 
 
 import kotlinx.coroutines.flow.first

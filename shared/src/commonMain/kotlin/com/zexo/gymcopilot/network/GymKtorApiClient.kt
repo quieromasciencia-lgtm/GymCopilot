@@ -1,4 +1,4 @@
-package com.zexo.gymcopilot.network
+package com.zexo.gymcopilot.shared.network
 
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
