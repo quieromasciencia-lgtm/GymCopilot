@@ -293,7 +293,6 @@ fun MainAppView(
                     userRole = userRole,
                     onRoleClick = onChangeRole
                 )
-                BroadcastMessageDisplay("📢 ¡Recordatorio! Este viernes clase especial de Spinning a las 19:00 hs.")
             }
         },
         bottomBar = {
@@ -312,7 +311,7 @@ fun MainAppView(
                 .padding(horizontal = 16.dp)
         ) {
             when (userRole) {
-                "admin" -> AdminFullDashboard(apiClient = apiClient, currentTab = selectedTab, onNavigate = {})
+                "admin" -> RealAdminDashboardView(gymName = gymName, apiClient = apiClient, currentTab = selectedTab, onTabSelected = { selectedTab = it })
                 "profesor" -> ProfessorFullDashboard(apiClient = apiClient, currentTab = selectedTab, onNavigate = {})
                 else -> MemberFullDashboard(apiClient = apiClient, currentTab = selectedTab, onNavigate = {})
             }
@@ -381,40 +380,6 @@ fun HeaderBar(
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun BroadcastMessageDisplay(message: String) {
-    if (message.isNotBlank()) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.White.copy(alpha = 0.05f))
-                .background(
-                    brush = Brush.horizontalGradient(
-                        0.0f to Color(0xFF8A2BE2).copy(alpha = 0.3f),
-                        0.3f to Color.Transparent,
-                        0.7f to Color.Transparent,
-                        1.0f to Color.Red.copy(alpha = 0.3f)
-                    )
-                )
-                .padding(vertical = 10.dp, horizontal = 20.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = message,
-                color = TextWhite,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-                modifier = Modifier.basicMarquee(
-                    iterations = Int.MAX_VALUE,
-                    repeatDelayMillis = 1000
-                )
-            )
         }
     }
 }
