@@ -1,18 +1,18 @@
 package com.zexo.gymcopilot.ui
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -22,33 +22,35 @@ import kotlinx.coroutines.delay
 
 enum class AppScreenState {
     SPLASH,
-    ROLE_SELECTOR,
+    LOGIN,
     MAIN_APP
 }
 
 @Composable
 fun SharedGymCopilotApp(
     initialRole: String = "admin",
-    gymName: String = "GymCopilot"
+    gymName: String = "Tu Gimnasio"
 ) {
     var screenState by remember { mutableStateOf(AppScreenState.SPLASH) }
     var currentRole by remember { mutableStateOf(initialRole.lowercase()) }
 
     GymCopilotTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(GymBackgroundGradient)
         ) {
             when (screenState) {
                 AppScreenState.SPLASH -> {
                     SplashScreenView(
                         gymName = gymName,
-                        onTimeout = { screenState = AppScreenState.ROLE_SELECTOR }
+                        onTimeout = { screenState = AppScreenState.LOGIN }
                     )
                 }
-                AppScreenState.ROLE_SELECTOR -> {
-                    RoleSelectorView(
-                        onSelectRole = { selectedRole ->
+                AppScreenState.LOGIN -> {
+                    LoginScreenView(
+                        gymName = gymName,
+                        onRoleSelected = { selectedRole ->
                             currentRole = selectedRole
                             screenState = AppScreenState.MAIN_APP
                         }
@@ -58,7 +60,7 @@ fun SharedGymCopilotApp(
                     MainAppView(
                         gymName = gymName,
                         userRole = currentRole,
-                        onChangeRole = { screenState = AppScreenState.ROLE_SELECTOR }
+                        onChangeRole = { screenState = AppScreenState.LOGIN }
                     )
                 }
             }
@@ -79,7 +81,7 @@ fun SplashScreenView(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(DarkBackgroundColor),
+            .background(DarkBackground),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -127,117 +129,108 @@ fun SplashScreenView(
                 trackColor = SurfaceColor
             )
         }
-    }
-}
 
-@Composable
-fun RoleSelectorView(
-    onSelectRole: (String) -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(DarkBackgroundColor)
-            .padding(24.dp),
-        contentAlignment = Alignment.Center
-    ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 40.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Bienvenido a GymCopilot",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextWhite
-            )
-
-            Text(
-                text = "Selecciona un perfil para ingresar a la app",
+                text = "🇦🇷 Las Malvinas son Argentinas",
+                color = TextWhite.copy(alpha = 0.7f),
                 fontSize = 14.sp,
-                color = TextGray,
-                modifier = Modifier.padding(top = 6.dp, bottom = 28.dp)
-            )
-
-            RoleCard(
-                title = "Administrador",
-                description = "Métricas, gestión de miembros, horarios y caja",
-                icon = "👑",
-                accent = PrimaryTurquoise,
-                onClick = { onSelectRole("admin") }
-            )
-
-            RoleCard(
-                title = "Profesor / Entrenador",
-                description = "Control de clases, asistencias y rutinas de alumnos",
-                icon = "🏋️",
-                accent = AccentOrange,
-                onClick = { onSelectRole("profesor") }
-            )
-
-            RoleCard(
-                title = "Alumno / Miembro",
-                description = "Mi rutina del día, pase de acceso y horarios",
-                icon = "👤",
-                accent = Color(0xFF4CAF50),
-                onClick = { onSelectRole("alumno") }
-            )
-
-            RoleCard(
-                title = "Tienda y Productos",
-                description = "Catálogo de suplementos, indumentaria y planes",
-                icon = "🛒",
-                accent = Color(0xFFE91E63),
-                onClick = { onSelectRole("tienda") }
+                fontWeight = FontWeight.Medium
             )
         }
     }
 }
 
 @Composable
-fun RoleCard(
-    title: String,
-    description: String,
-    icon: String,
-    accent: Color,
-    onClick: () -> Unit
+fun LoginScreenView(
+    gymName: String,
+    onRoleSelected: (String) -> Unit
 ) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = SurfaceColor),
-        shape = RoundedCornerShape(16.dp),
+    Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 6.dp)
-            .clickable { onClick() }
+            .fillMaxSize()
+            .padding(24.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(18.dp),
-            verticalAlignment = Alignment.CenterVertically
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(vertical = 40.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(accent.copy(alpha = 0.15f), shape = RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = icon, fontSize = 24.sp)
+            item {
+                Surface(
+                    color = PrimaryTurquoise.copy(alpha = 0.15f),
+                    shape = RoundedCornerShape(24.dp)
+                ) {
+                    Text(
+                        text = "🦁",
+                        fontSize = 64.sp,
+                        modifier = Modifier.padding(20.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    text = "Bienvenido a",
+                    color = TextGray,
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center
+                )
+
+                Text(
+                    text = gymName.ifBlank { "Tu Gimnasio" },
+                    color = PrimaryTurquoise,
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Black,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Selecciona tu rol para continuar",
+                    color = TextWhite,
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextWhite
+            item {
+                RoleCard(
+                    title = "Administrador",
+                    description = "Gestiona tu gimnasio, socios y planes",
+                    iconEmoji = "🛡️",
+                    accentColor = PrimaryTurquoise,
+                    onClick = { onRoleSelected("admin") }
                 )
-                Text(
-                    text = description,
-                    fontSize = 12.sp,
-                    color = TextGray
+            }
+
+            item {
+                RoleCard(
+                    title = "Profesor",
+                    description = "Acceso al panel de entrenamiento",
+                    iconEmoji = "💻",
+                    accentColor = PrimaryTurquoise,
+                    onClick = { onRoleSelected("profesor") }
+                )
+            }
+
+            item {
+                RoleCard(
+                    title = "Socio del Gimnasio",
+                    description = "Sigue tu progreso y tabla",
+                    iconEmoji = "👤",
+                    accentColor = PrimaryTurquoise,
+                    onClick = { onRoleSelected("member") }
                 )
             }
         }
@@ -254,11 +247,14 @@ fun MainAppView(
 
     Scaffold(
         topBar = {
-            GymHeader(
-                gymName = gymName,
-                userRole = userRole,
-                onRoleClick = onChangeRole
-            )
+            Column {
+                HeaderBar(
+                    gymName = gymName,
+                    userRole = userRole,
+                    onRoleClick = onChangeRole
+                )
+                BroadcastMessageDisplay("📢 ¡Recordatorio! Este viernes clase especial de Spinning a las 19:00 hs.")
+            }
         },
         bottomBar = {
             RoleNavigationBar(
@@ -267,7 +263,7 @@ fun MainAppView(
                 onTabSelected = { selectedTab = it }
             )
         },
-        containerColor = DarkBackgroundColor
+        containerColor = Color.Transparent
     ) { innerPadding ->
         Box(
             modifier = Modifier
@@ -278,9 +274,107 @@ fun MainAppView(
             when (userRole) {
                 "admin" -> AdminView(tab = selectedTab)
                 "profesor" -> ProfessorView(tab = selectedTab)
-                "alumno" -> MemberView(tab = selectedTab)
-                else -> StoreView(tab = selectedTab)
+                else -> MemberView(tab = selectedTab)
             }
+        }
+    }
+}
+
+@Composable
+fun HeaderBar(
+    gymName: String,
+    userRole: String,
+    onRoleClick: () -> Unit
+) {
+    Surface(
+        color = Color(0xFF00151C),
+        tonalElevation = 8.dp,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 14.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(
+                    text = gymName.ifBlank { "Tu Gimnasio" },
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = PrimaryTurquoise
+                )
+                Text(
+                    text = "SISTEMA GYMCOPILOT",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = TextGray
+                )
+            }
+
+            Surface(
+                color = PrimaryTurquoise.copy(alpha = 0.15f),
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier.clickable { onRoleClick() }
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(PrimaryTurquoise)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = when (userRole) {
+                            "admin" -> "ADMIN"
+                            "profesor" -> "PROFESOR"
+                            else -> "SOCIO"
+                        },
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = PrimaryTurquoise
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BroadcastMessageDisplay(message: String) {
+    if (message.isNotBlank()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.White.copy(alpha = 0.05f))
+                .background(
+                    brush = Brush.horizontalGradient(
+                        0.0f to Color(0xFF8A2BE2).copy(alpha = 0.3f),
+                        0.3f to Color.Transparent,
+                        0.7f to Color.Transparent,
+                        1.0f to Color.Red.copy(alpha = 0.3f)
+                    )
+                )
+                .padding(vertical = 10.dp, horizontal = 20.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = message,
+                color = TextWhite,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                modifier = Modifier.basicMarquee(
+                    iterations = Int.MAX_VALUE,
+                    repeatDelayMillis = 1000
+                )
+            )
         }
     }
 }
@@ -292,49 +386,54 @@ fun RoleNavigationBar(
     onTabSelected: (Int) -> Unit
 ) {
     val items = when (userRole) {
-        "admin" -> listOf("Resumen", "Miembros", "Horarios", "Ajustes")
-        "profesor" -> listOf("Mis Clases", "Asistencias", "Rutinas")
-        "alumno" -> listOf("Mi Rutina", "Clases", "Membresía")
-        else -> listOf("Productos", "Planes")
+        "admin" -> listOf("Home", "Store", "Clientes", "Profesores", "Config")
+        "profesor" -> listOf("Home", "Tienda", "Horarios", "Alumnos", "Rutinas", "Chat")
+        else -> listOf("Home", "Tienda", "Clases", "Rutinas", "Chat")
     }
 
     NavigationBar(
-        containerColor = SurfaceColor,
-        contentColor = TextWhite
+        modifier = Modifier.height(56.dp),
+        containerColor = Color(0xFF00151C),
+        contentColor = TextWhite,
+        windowInsets = WindowInsets(0, 0, 0, 0)
     ) {
         items.forEachIndexed { index, label ->
-            NavigationBarItem(
-                selected = selectedTab == index,
-                onClick = { onTabSelected(index) },
-                icon = {
+            val isSelected = selectedTab == index
+
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(horizontal = 2.dp, vertical = 4.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .clickable { onTabSelected(index) },
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
                     Text(
                         text = when (label) {
-                            "Resumen", "Mi Rutina" -> "📊"
-                            "Miembros", "Asistencias" -> "👥"
-                            "Horarios", "Mis Clases", "Clases" -> "📅"
+                            "Home" -> "📊"
+                            "Store", "Tienda" -> "🛒"
+                            "Clientes", "Alumnos" -> "👥"
+                            "Profesores" -> "👨‍🏫"
+                            "Horarios", "Clases" -> "📅"
                             "Rutinas" -> "🏋️"
-                            "Membresía", "Planes" -> "💳"
-                            "Productos" -> "🛒"
+                            "Chat" -> "💬"
                             else -> "⚙️"
                         },
                         fontSize = 18.sp
                     )
-                },
-                label = {
                     Text(
                         text = label,
-                        fontSize = 11.sp,
-                        fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal
+                        fontSize = 8.sp,
+                        color = if (isSelected) PrimaryTurquoise else TextGray,
+                        maxLines = 1
                     )
-                },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = PrimaryTurquoise,
-                    selectedTextColor = PrimaryTurquoise,
-                    indicatorColor = PrimaryTurquoise.copy(alpha = 0.15f),
-                    unselectedIconColor = TextGray,
-                    unselectedTextColor = TextGray
-                )
-            )
+                }
+            }
         }
     }
 }
@@ -346,7 +445,7 @@ fun AdminView(tab: Int) {
             LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
                 item {
                     Text(
-                        text = "Panel de Administración",
+                        text = "Panel del Administrador",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextWhite,
@@ -360,7 +459,7 @@ fun AdminView(tab: Int) {
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         StatCard(
-                            title = "Miembros Activos",
+                            title = "Socios Activos",
                             value = "142",
                             subtitle = "+12 este mes",
                             accentColor = PrimaryTurquoise,
@@ -379,7 +478,7 @@ fun AdminView(tab: Int) {
                 item {
                     Spacer(modifier = Modifier.height(20.dp))
                     Text(
-                        text = "Miembros Recientes",
+                        text = "Lista de Socios y Asistencia",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextWhite,
@@ -395,10 +494,11 @@ fun AdminView(tab: Int) {
                 }
             }
         }
-        1 -> {
+        1 -> StoreView(tab = 0)
+        2 -> {
             LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
                 item {
-                    Text(text = "Gestión de Miembros", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                    Text(text = "Clientes / Socios del Gimnasio", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
                     Spacer(modifier = Modifier.height(12.dp))
                 }
                 item {
@@ -411,23 +511,22 @@ fun AdminView(tab: Int) {
                 }
             }
         }
-        2 -> {
+        3 -> {
             LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
                 item {
-                    Text(text = "Horarios y Clases de Hoy", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                    Text(text = "Profesores / Entrenadores", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
                     Spacer(modifier = Modifier.height(12.dp))
                 }
                 item {
-                    ClassScheduleCard("Crossfit Intensivo", "Prof. Roberto", "08:00 - 09:00", "15/15 Cupos")
-                    ClassScheduleCard("Yoga & Mobility", "Prof. Laura", "10:00 - 11:00", "8/12 Cupos")
-                    ClassScheduleCard("Spinning Power", "Prof. Marcos", "18:00 - 19:00", "20/20 Cupos")
-                    ClassScheduleCard("Musculación Guiada", "Prof. Gabriel", "19:00 - 20:30", "12/25 Cupos")
+                    MemberCard("Prof. Gabriel Fernández", "Musculación & Personalizado", "ACTIVO", "Hoy 07:00 AM", true)
+                    MemberCard("Prof. Laura Benítez", "Yoga & Mobility", "ACTIVO", "Hoy 09:30 AM", true)
+                    MemberCard("Prof. Roberto Carlos", "Crossfit & Funcional", "ACTIVO", "Ayer 17:00 PM", true)
                 }
             }
         }
         else -> {
             Column(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
-                Text(text = "Configuración del Sistema", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                Text(text = "Configuración del Gimnasio", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
                 Spacer(modifier = Modifier.height(16.dp))
                 Card(
                     colors = CardDefaults.cardColors(containerColor = SurfaceColor),
@@ -435,7 +534,7 @@ fun AdminView(tab: Int) {
                     modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = "🌐 Red Wi-Fi de Asistencia", fontWeight = FontWeight.Bold, color = PrimaryTurquoise)
+                        Text(text = "🌐 Red Wi-Fi para Asistencia Automática", fontWeight = FontWeight.Bold, color = PrimaryTurquoise)
                         Text(text = "SSID: GymCopilot_VIP_5G", color = TextWhite, fontSize = 14.sp)
                     }
                 }
@@ -445,8 +544,8 @@ fun AdminView(tab: Int) {
                     modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = "☁️ Estado de Sincronización", fontWeight = FontWeight.Bold, color = PrimaryTurquoise)
-                        Text(text = "Google Sheets Ktor API: Conectado", color = TextWhite, fontSize = 14.sp)
+                        Text(text = "☁️ Sincronización Google Sheets Ktor API", fontWeight = FontWeight.Bold, color = PrimaryTurquoise)
+                        Text(text = "Estado: Conectado y Sincronizado", color = TextWhite, fontSize = 14.sp)
                     }
                 }
             }
@@ -460,7 +559,7 @@ fun ProfessorView(tab: Int) {
         0 -> {
             LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
                 item {
-                    Text(text = "Mis Clases Asignadas", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                    Text(text = "Panel de Entrenamiento - Profesor", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
                     Spacer(modifier = Modifier.height(12.dp))
                 }
                 item {
@@ -469,10 +568,24 @@ fun ProfessorView(tab: Int) {
                 }
             }
         }
-        1 -> {
+        1 -> StoreView(tab = 0)
+        2 -> {
             LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
                 item {
-                    Text(text = "Control de Asistencia", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                    Text(text = "Horarios de Clases", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+                item {
+                    ClassScheduleCard("Crossfit Intensivo", "Prof. Roberto", "08:00 - 09:00", "15/15 Cupos")
+                    ClassScheduleCard("Yoga & Mobility", "Prof. Laura", "10:00 - 11:00", "8/12 Cupos")
+                    ClassScheduleCard("Spinning Power", "Prof. Marcos", "18:00 - 19:00", "20/20 Cupos")
+                }
+            }
+        }
+        3 -> {
+            LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
+                item {
+                    Text(text = "Mis Alumnos Asignados", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
                     Spacer(modifier = Modifier.height(12.dp))
                 }
                 item {
@@ -482,16 +595,32 @@ fun ProfessorView(tab: Int) {
                 }
             }
         }
-        else -> {
+        4 -> {
             LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
                 item {
-                    Text(text = "Asignación de Rutinas", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                    Text(text = "Gestión de Rutinas", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
                     Spacer(modifier = Modifier.height(12.dp))
                 }
                 item {
                     RoutineCard("Sentadilla Libre con Barra", "4", "10", "90 seg", false) {}
                     RoutineCard("Press de Banca Plano", "4", "12", "90 seg", false) {}
                     RoutineCard("Remo con Barra T", "3", "12", "60 seg", false) {}
+                }
+            }
+        }
+        else -> {
+            Column(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
+                Text(text = "Chat de Soporte y Alumnos", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                Spacer(modifier = Modifier.height(16.dp))
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = SurfaceColor),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(text = "💬 Chat con Alumnos", fontWeight = FontWeight.Bold, color = PrimaryTurquoise)
+                        Text(text = "Sin mensajes pendientes", color = TextGray, fontSize = 14.sp)
+                    }
                 }
             }
         }
@@ -520,10 +649,11 @@ fun MemberView(tab: Int) {
                 }
             }
         }
-        1 -> {
+        1 -> StoreView(tab = 0)
+        2 -> {
             LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
                 item {
-                    Text(text = "Reservar Clases", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                    Text(text = "Horarios y Reserva de Clases", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
                     Spacer(modifier = Modifier.height(12.dp))
                 }
                 item {
@@ -533,17 +663,34 @@ fun MemberView(tab: Int) {
                 }
             }
         }
+        3 -> {
+            LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
+                item {
+                    Text(text = "Mis Rutinas Guardadas", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+                item {
+                    RoutineCard("Press Inclinado con Mancuernas", "4", "10 - 12", "90 seg", ex1) { ex1 = !ex1 }
+                    RoutineCard("Aperturas en Polea Alta", "3", "15", "60 seg", ex2) { ex2 = !ex2 }
+                    RoutineCard("Fondos en Paralelas", "4", "10", "90 seg", ex3) { ex3 = !ex3 }
+                    RoutineCard("Extensión de Tríceps Polea", "3", "12 - 15", "60 seg", ex4) { ex4 = !ex4 }
+                }
+            }
+        }
         else -> {
             Column(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
-                Text(text = "Estado de mi Membresía", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                Text(text = "Chat y Asistencia", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
                 Spacer(modifier = Modifier.height(16.dp))
-                StatCard(
-                    title = "Plan Actual",
-                    value = "Pase Libre VIP",
-                    subtitle = "Vence en 18 días (15 de Octubre)",
-                    accentColor = PrimaryTurquoise,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = SurfaceColor),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(text = "💬 Chat con el Gimnasio", fontWeight = FontWeight.Bold, color = PrimaryTurquoise)
+                        Text(text = "Conectado", color = TextGray, fontSize = 14.sp)
+                    }
+                }
             }
         }
     }
@@ -551,33 +698,18 @@ fun MemberView(tab: Int) {
 
 @Composable
 fun StoreView(tab: Int) {
-    when (tab) {
-        0 -> {
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
-                item {
-                    Text(text = "Catálogo de Suplementos e Indumentaria", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextWhite)
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-                item {
-                    ProductCard("Whey Protein Isolate 1kg", "Suplementación", "$45.000")
-                    ProductCard("Creatina Monohidratada 300g", "Suplementación", "$38.000")
-                    ProductCard("Shaker Térmico GymCopilot", "Accesorios", "$12.500")
-                    ProductCard("Remera OverSize GymCopilot", "Indumentaria", "$22.000")
-                }
-            }
+    LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
+        item {
+            Text(text = "Tienda & Productos del Gimnasio", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+            Spacer(modifier = Modifier.height(12.dp))
         }
-        else -> {
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 16.dp)) {
-                item {
-                    Text(text = "Planes de Membresía del Gimnasio", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextWhite)
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-                item {
-                    ProductCard("Plan Pase Libre Mensual", "Musculación + Clases", "$35.000 / mes")
-                    ProductCard("Plan Trimestral Promocional", "Ahorra 15%", "$90.000 total")
-                    ProductCard("Plan Anual VIP Copilot", "Ahorra 30% + Regalo", "$280.000 total")
-                }
-            }
+        item {
+            ProductCard("Whey Protein Isolate 1kg", "Suplementación", "$45.000")
+            ProductCard("Creatina Monohidratada 300g", "Suplementación", "$38.000")
+            ProductCard("Shaker Térmico GymCopilot", "Accesorios", "$12.500")
+            ProductCard("Remera OverSize GymCopilot", "Indumentaria", "$22.000")
+            ProductCard("Plan Pase Libre Mensual", "Membresía", "$35.000 / mes")
+            ProductCard("Plan Trimestral Promocional", "Membresía", "$90.000 total")
         }
     }
 }

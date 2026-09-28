@@ -1,6 +1,7 @@
 package com.zexo.gymcopilot.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -16,62 +17,63 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun GymHeader(
-    gymName: String,
-    userRole: String,
-    onRoleClick: () -> Unit
+fun RoleCard(
+    title: String,
+    description: String,
+    iconEmoji: String,
+    accentColor: Color = PrimaryTurquoise,
+    shape: RoundedCornerShape = RoundedCornerShape(14.dp),
+    onClick: () -> Unit
 ) {
-    Surface(
-        color = SurfaceColor,
-        tonalElevation = 4.dp,
-        modifier = Modifier.fillMaxWidth()
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(CardBackground)
+            .border(1.5.dp, accentColor, shape)
+            .clickable { onClick() }
+            .padding(20.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(shape)
+                    .background(accentColor.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
                 Text(
-                    text = gymName.ifBlank { "GymCopilot" },
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = PrimaryTurquoise
-                )
-                Text(
-                    text = "SISTEMA DE GESTIÓN INTEGRAL",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = TextGray
+                    text = iconEmoji,
+                    fontSize = 28.sp
                 )
             }
 
-            Surface(
-                color = PrimaryTurquoise.copy(alpha = 0.15f),
-                shape = RoundedCornerShape(20.dp),
-                modifier = Modifier.clickable { onRoleClick() }
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(CircleShape)
-                            .background(PrimaryTurquoise)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = userRole.uppercase(),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = PrimaryTurquoise
-                    )
-                }
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    color = TextWhite,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = description,
+                    color = TextGray,
+                    fontSize = 14.sp
+                )
             }
+
+            Text(
+                text = "›",
+                color = accentColor,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
