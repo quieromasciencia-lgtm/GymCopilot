@@ -1,0 +1,52 @@
+name: Desplegar GymCopilot PWA (GitHub Pages)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del proyecto
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Configurar Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Dar permisos de ejecucion a gradlew
+        run: chmod +x gradlew
+
+      - name: Compilar Distribución Web PWA (JS)
+        run: ./gradlew :shared:jsBrowserDistribution --no-daemon
+
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Subir Artefactos para GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: shared/build/dist/js/productionExecutable/
+
+      - name: Desplegar en GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
