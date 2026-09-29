@@ -1,5 +1,8 @@
-package com.zexo.gymcopilot.navigation
+@file:JvmName("SharedGymNavGraphKt")
 
+package com.zexo.gymcopilot.shared.navigation
+
+import kotlin.jvm.JvmName
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import com.zexo.gymcopilot.shared.network.GymKtorApiClient
