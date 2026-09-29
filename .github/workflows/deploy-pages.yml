@@ -37,7 +37,22 @@ jobs:
         run: chmod +x gradlew
 
       - name: Compilar Distribución Web PWA (JS)
-        run: ./gradlew :shared:jsBrowserDistribution --no-daemon
+        run: ./gradlew :shared:jsBrowserDistribution :shared:jsBrowserProductionWebpack --no-daemon
+
+      - name: Preparar carpeta de publicación PWA
+        run: |
+          mkdir -p pwa-out
+          if [ -d "shared/build/dist/js/productionExecutable" ]; then
+            cp -R shared/build/dist/js/productionExecutable/* pwa-out/ || true
+          fi
+          if [ -d "shared/build/kotlin-webpack/js/productionExecutable" ]; then
+            cp -R shared/build/kotlin-webpack/js/productionExecutable/* pwa-out/ || true
+          fi
+          if [ -d "shared/src/jsMain/resources" ]; then
+            cp -R shared/src/jsMain/resources/* pwa-out/ || true
+          fi
+          echo "==== Archivos en pwa-out/ ===="
+          ls -la pwa-out/
 
       - name: Configurar GitHub Pages
         uses: actions/configure-pages@v5
@@ -45,7 +60,7 @@ jobs:
       - name: Subir Artefactos para GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
-          path: shared/build/dist/js/productionExecutable/
+          path: pwa-out/
 
       - name: Desplegar en GitHub Pages
         id: deployment
