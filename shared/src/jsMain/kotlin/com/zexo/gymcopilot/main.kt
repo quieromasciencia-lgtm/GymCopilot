@@ -6,7 +6,7 @@ import com.zexo.gymcopilot.ui.SharedGymCopilotApp
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
-    CanvasBasedWindow(title = "GymCopilot") {
+    CanvasBasedWindow(title = "GymCopilot", canvasElementId = "ComposeTarget") {
         SharedGymCopilotApp()
     }
 }
