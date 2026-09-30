@@ -1,4 +1,4 @@
-name: Desplegar GymCopilot PWA (GitHub Pages)
+name: Desplegar GymCopilot PWA (Páginas de GitHub)
 
 on:
   push:
@@ -23,6 +23,11 @@ jobs:
     steps:
       - name: Checkout del proyecto
         uses: actions/checkout@v4
+
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - name: Configurar Java 17
         uses: actions/setup-java@v5
@@ -53,9 +58,6 @@ jobs:
           fi
           echo "==== Archivos en pwa-out/ ===="
           ls -la pwa-out/
-
-      - name: Configurar GitHub Pages
-        uses: actions/configure-pages@v5
 
       - name: Subir Artefactos para GitHub Pages
         uses: actions/upload-pages-artifact@v3
