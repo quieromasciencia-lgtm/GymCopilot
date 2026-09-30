@@ -6,19 +6,10 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
+  contents: write
 
 jobs:
   build-and-deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout del proyecto
@@ -54,11 +45,10 @@ jobs:
           echo "==== Archivos en pwa-out/ ===="
           ls -la pwa-out/
 
-      - name: Subir Artefactos para GitHub Pages
-        uses: actions/upload-pages-artifact@v3
+      - name: Desplegar PWA a rama gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: pwa-out/
-
-      - name: Desplegar en GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./pwa-out
+          publish_branch: gh-pages
+          force_orphan: true
