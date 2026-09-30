@@ -39,9 +39,14 @@ jobs:
           if [ -d "shared/build/kotlin-webpack/js/productionExecutable" ]; then
             cp -R shared/build/kotlin-webpack/js/productionExecutable/* pwa-out/ || true
           fi
+          if [ -d "shared/build/processedResources/js/main" ]; then
+            cp -R shared/build/processedResources/js/main/* pwa-out/ || true
+          fi
           if [ -d "shared/src/jsMain/resources" ]; then
             cp -R shared/src/jsMain/resources/* pwa-out/ || true
           fi
+          find shared/build -name "*.wasm" -exec cp {} pwa-out/ \; || true
+          find shared/build -name "*skiko*.js" -exec cp {} pwa-out/ \; || true
           echo "==== Archivos en pwa-out/ ===="
           ls -la pwa-out/
 
