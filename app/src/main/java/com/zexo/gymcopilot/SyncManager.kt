@@ -26,7 +26,7 @@ class SyncManager(
                 } catch (e: Exception) {
                     Log.e("SyncManager", "Error en el bucle de sincronización: ${e.message}")
                 }
-                delay(20000)
+                delay(20000) // 20 segundos
             }
         }
     }

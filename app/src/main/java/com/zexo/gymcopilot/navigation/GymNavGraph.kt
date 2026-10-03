@@ -179,7 +179,7 @@ fun GymNavGraph(
                 onStoreClick = onMemberStore,
                 onClassesClick = onMemberClasses,
                 onRoutinesClick = onMemberRoutines,
-                onRoutineDetailClick = { id: String -> navController.navigate(Screen.RoutineDetail.createRoute(id)) },
+                onRoutineDetailClick = { id -> navController.navigate(Screen.RoutineDetail.createRoute(id)) },
                 onChatClick = onMemberChat,
                 onHelpClick = { navController.navigate(Screen.MemberHelp.route) }
             )

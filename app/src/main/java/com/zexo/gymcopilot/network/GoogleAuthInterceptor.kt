@@ -12,6 +12,7 @@ class GoogleAuthInterceptor(private val dataStoreManager: DataStoreManager) : In
         val token = runBlocking { dataStoreManager.getGoogleAccessToken().first() }
         val originalRequest = chain.request()
         
+        // Solo inyectamos en dominios de Google
         if (originalRequest.url.host.contains("googleapis.com")) {
             if (token.isBlank()) {
                 Log.e("GoogleAuthInterceptor", "Petición a ${originalRequest.url.encodedPath} ABORTADA: Token vacío")

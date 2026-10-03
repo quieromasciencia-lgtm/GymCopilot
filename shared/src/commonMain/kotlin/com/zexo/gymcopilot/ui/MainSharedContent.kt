@@ -1,30 +1,67 @@
 package com.zexo.gymcopilot.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zexo.gymcopilot.DataStoreManager
-import com.zexo.gymcopilot.ui.screens.*
-import com.zexo.gymcopilot.ui.theme.*
+import com.zexo.gymcopilot.shared.network.GymKtorApiClient
 import kotlinx.coroutines.delay
 
 enum class AppScreenState {
     SPLASH,
     LOGIN,
-    ADMIN_DASHBOARD,
-    MEMBER_DASHBOARD,
-    PROFESSOR_DASHBOARD,
-    MEMBERS,
-    STORE,
-    PUBLIC_STORE,
-    ROUTINES
+    MAIN_APP
+}
+
+@Composable
+fun RoleCard(
+    title: String,
+    description: String,
+    iconEmoji: String,
+    accentColor: Color,
+    onClick: () -> Unit
+) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = SurfaceColor),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+    ) {
+        Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                color = accentColor.copy(alpha = 0.15f),
+                shape = CircleShape,
+                modifier = Modifier.size(50.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(text = iconEmoji, fontSize = 24.sp)
+                }
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(text = title, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextWhite)
+                Text(text = description, fontSize = 12.sp, color = TextGray)
+            }
+        }
+    }
 }
 
 @Composable
@@ -32,10 +69,8 @@ fun SharedGymCopilotApp(
     initialRole: String = "admin",
     gymName: String = "Tu Gimnasio"
 ) {
-    val dataStoreManager = remember { DataStoreManager() }
     var screenState by remember { mutableStateOf(AppScreenState.SPLASH) }
     var currentRole by remember { mutableStateOf(initialRole.lowercase()) }
-    var selectedCategoryId by remember { mutableStateOf("EQUIPMENT") }
 
     GymCopilotTheme {
         Box(
@@ -51,127 +86,20 @@ fun SharedGymCopilotApp(
                     )
                 }
                 AppScreenState.LOGIN -> {
-                    LoginScreen(
+                    LoginScreenView(
+                        gymName = gymName,
                         onRoleSelected = { selectedRole ->
                             currentRole = selectedRole
-                            screenState = when (selectedRole) {
-                                "admin" -> AppScreenState.ADMIN_DASHBOARD
-                                "professor", "profesor" -> AppScreenState.PROFESSOR_DASHBOARD
-                                else -> AppScreenState.MEMBER_DASHBOARD
-                            }
-                        },
-                        dataStoreManager = dataStoreManager
+                            screenState = AppScreenState.MAIN_APP
+                        }
                     )
                 }
-                AppScreenState.ADMIN_DASHBOARD -> {
-                    AdminDashboardScreen(
-                        onAppSettingsClick = { screenState = AppScreenState.LOGIN },
-                        onStoreClick = { screenState = AppScreenState.STORE },
-                        onMembersClick = { screenState = AppScreenState.MEMBERS },
-                        onProfessorsClick = { screenState = AppScreenState.MEMBERS },
-                        onScheduleClick = { screenState = AppScreenState.ROUTINES },
-                        dataStoreManager = dataStoreManager
-                    )
-                }
-                AppScreenState.PROFESSOR_DASHBOARD -> {
-                    ProfessorDashboardScreen(
-                        onHomeClick = { screenState = AppScreenState.PROFESSOR_DASHBOARD },
-                        onStoreClick = { screenState = AppScreenState.PUBLIC_STORE },
-                        onMembersClick = { screenState = AppScreenState.MEMBERS },
-                        onRoutinesClick = { screenState = AppScreenState.ROUTINES },
-                        onProfileClick = { screenState = AppScreenState.LOGIN },
-                        dataStoreManager = dataStoreManager
-                    )
-                }
-                AppScreenState.MEMBER_DASHBOARD -> {
-                    MemberDashboardScreen(
-                        onHomeClick = { screenState = AppScreenState.MEMBER_DASHBOARD },
-                        onStoreClick = { screenState = AppScreenState.PUBLIC_STORE },
-                        onRoutinesClick = { screenState = AppScreenState.ROUTINES },
-                        onProfileClick = { screenState = AppScreenState.LOGIN },
-                        dataStoreManager = dataStoreManager
-                    )
-                }
-                AppScreenState.MEMBERS -> {
-                    MembersScreen(
-                        onBack = {
-                            screenState = when (currentRole) {
-                                "admin" -> AppScreenState.ADMIN_DASHBOARD
-                                "professor", "profesor" -> AppScreenState.PROFESSOR_DASHBOARD
-                                else -> AppScreenState.MEMBER_DASHBOARD
-                            }
-                        },
-                        onHomeClick = {
-                            screenState = when (currentRole) {
-                                "admin" -> AppScreenState.ADMIN_DASHBOARD
-                                "professor", "profesor" -> AppScreenState.PROFESSOR_DASHBOARD
-                                else -> AppScreenState.MEMBER_DASHBOARD
-                            }
-                        },
-                        onStoreClick = { screenState = AppScreenState.STORE },
-                        onSettingsClick = { screenState = AppScreenState.LOGIN },
-                        isAdmin = currentRole == "admin",
-                        isProfessor = currentRole == "professor" || currentRole == "profesor",
-                        dataStoreManager = dataStoreManager
-                    )
-                }
-                AppScreenState.STORE -> {
-                    StoreScreen(
-                        onBack = { screenState = AppScreenState.ADMIN_DASHBOARD },
-                        onHomeClick = { screenState = AppScreenState.ADMIN_DASHBOARD },
-                        onStoreClick = { screenState = AppScreenState.STORE },
-                        onMembersClick = { screenState = AppScreenState.MEMBERS },
-                        onViewPublicStoreClick = { screenState = AppScreenState.PUBLIC_STORE },
-                        onCategoryClick = { catId ->
-                            selectedCategoryId = catId
-                            screenState = AppScreenState.PUBLIC_STORE
-                        },
-                        dataStoreManager = dataStoreManager
-                    )
-                }
-                AppScreenState.PUBLIC_STORE -> {
-                    PublicStoreScreen(
-                        onBack = {
-                            screenState = when (currentRole) {
-                                "admin" -> AppScreenState.STORE
-                                "professor", "profesor" -> AppScreenState.PROFESSOR_DASHBOARD
-                                else -> AppScreenState.MEMBER_DASHBOARD
-                            }
-                        },
-                        onHomeClick = {
-                            screenState = when (currentRole) {
-                                "admin" -> AppScreenState.ADMIN_DASHBOARD
-                                "professor", "profesor" -> AppScreenState.PROFESSOR_DASHBOARD
-                                else -> AppScreenState.MEMBER_DASHBOARD
-                            }
-                        },
-                        onStoreClick = {
-                            screenState = if (currentRole == "admin") AppScreenState.STORE else AppScreenState.PUBLIC_STORE
-                        },
-                        onCategoryClick = { catId -> selectedCategoryId = catId },
-                        isMember = currentRole == "member",
-                        isProfessor = currentRole == "professor" || currentRole == "profesor",
-                        dataStoreManager = dataStoreManager
-                    )
-                }
-                AppScreenState.ROUTINES -> {
-                    RoutineDashboardScreen(
-                        onBack = {
-                            screenState = when (currentRole) {
-                                "admin" -> AppScreenState.ADMIN_DASHBOARD
-                                "professor", "profesor" -> AppScreenState.PROFESSOR_DASHBOARD
-                                else -> AppScreenState.MEMBER_DASHBOARD
-                            }
-                        },
-                        onHomeClick = {
-                            screenState = when (currentRole) {
-                                "admin" -> AppScreenState.ADMIN_DASHBOARD
-                                "professor", "profesor" -> AppScreenState.PROFESSOR_DASHBOARD
-                                else -> AppScreenState.MEMBER_DASHBOARD
-                            }
-                        },
-                        onStoreClick = { screenState = AppScreenState.PUBLIC_STORE },
-                        dataStoreManager = dataStoreManager
+                AppScreenState.MAIN_APP -> {
+                    MainAppView(
+                        gymName = gymName,
+                        userRole = currentRole,
+                        apiClient = GymKtorApiClient,
+                        onChangeRole = { screenState = AppScreenState.LOGIN }
                     )
                 }
             }
@@ -202,7 +130,7 @@ fun SplashScreenView(
         ) {
             Surface(
                 color = PrimaryTurquoise.copy(alpha = 0.15f),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(24.dp)
+                shape = RoundedCornerShape(24.dp)
             ) {
                 Text(
                     text = "🏋️‍♂️",
@@ -253,6 +181,264 @@ fun SplashScreenView(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium
             )
+        }
+    }
+}
+
+@Composable
+fun LoginScreenView(
+    gymName: String,
+    onRoleSelected: (String) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(vertical = 40.dp)
+        ) {
+            item {
+                Surface(
+                    color = PrimaryTurquoise.copy(alpha = 0.15f),
+                    shape = RoundedCornerShape(24.dp)
+                ) {
+                    Text(
+                        text = "🦁",
+                        fontSize = 64.sp,
+                        modifier = Modifier.padding(20.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    text = "Bienvenido a",
+                    color = TextGray,
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center
+                )
+
+                Text(
+                    text = gymName.ifBlank { "Tu Gimnasio" },
+                    color = PrimaryTurquoise,
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Black,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Selecciona tu rol para continuar",
+                    color = TextWhite,
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            item {
+                RoleCard(
+                    title = "Administrador",
+                    description = "Gestiona tu gimnasio, socios y planes",
+                    iconEmoji = "🛡️",
+                    accentColor = PrimaryTurquoise,
+                    onClick = { onRoleSelected("admin") }
+                )
+            }
+
+            item {
+                RoleCard(
+                    title = "Profesor",
+                    description = "Acceso al panel de entrenamiento",
+                    iconEmoji = "💻",
+                    accentColor = PrimaryTurquoise,
+                    onClick = { onRoleSelected("profesor") }
+                )
+            }
+
+            item {
+                RoleCard(
+                    title = "Socio del Gimnasio",
+                    description = "Sigue tu progreso y tabla",
+                    iconEmoji = "👤",
+                    accentColor = PrimaryTurquoise,
+                    onClick = { onRoleSelected("member") }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun MainAppView(
+    gymName: String,
+    userRole: String,
+    apiClient: GymKtorApiClient,
+    onChangeRole: () -> Unit
+) {
+    var selectedTab by remember { mutableStateOf(0) }
+
+    Scaffold(
+        topBar = {
+            Column {
+                HeaderBar(
+                    gymName = gymName,
+                    userRole = userRole,
+                    onRoleClick = onChangeRole
+                )
+            }
+        },
+        bottomBar = {
+            RoleNavigationBar(
+                userRole = userRole,
+                selectedTab = selectedTab,
+                onTabSelected = { selectedTab = it }
+            )
+        },
+        containerColor = Color.Transparent
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = 16.dp)
+        ) {
+            when (userRole) {
+                "admin" -> RealAdminDashboardView(gymName = gymName, apiClient = apiClient, currentTab = selectedTab, onTabSelected = { selectedTab = it })
+                "profesor" -> ProfessorFullDashboard(apiClient = apiClient, currentTab = selectedTab, onNavigate = {})
+                else -> MemberFullDashboard(apiClient = apiClient, currentTab = selectedTab, onNavigate = {})
+            }
+        }
+    }
+}
+
+@Composable
+fun HeaderBar(
+    gymName: String,
+    userRole: String,
+    onRoleClick: () -> Unit
+) {
+    Surface(
+        color = Color(0xFF00151C),
+        tonalElevation = 8.dp,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 14.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(
+                    text = gymName.ifBlank { "Tu Gimnasio" },
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = PrimaryTurquoise
+                )
+                Text(
+                    text = "SISTEMA GYMCOPILOT",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = TextGray
+                )
+            }
+
+            Surface(
+                color = PrimaryTurquoise.copy(alpha = 0.15f),
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier.clickable { onRoleClick() }
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(PrimaryTurquoise)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = when (userRole) {
+                            "admin" -> "ADMIN"
+                            "profesor" -> "PROFESOR"
+                            else -> "SOCIO"
+                        },
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = PrimaryTurquoise
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun RoleNavigationBar(
+    userRole: String,
+    selectedTab: Int,
+    onTabSelected: (Int) -> Unit
+) {
+    val items = when (userRole) {
+        "admin" -> listOf("Home", "Store", "Clientes", "Profesores", "Config")
+        "profesor" -> listOf("Home", "Tienda", "Horarios", "Alumnos", "Rutinas", "Chat")
+        else -> listOf("Home", "Tienda", "Clases", "Rutinas", "Chat")
+    }
+
+    NavigationBar(
+        modifier = Modifier.height(56.dp),
+        containerColor = Color(0xFF00151C),
+        contentColor = TextWhite,
+        windowInsets = WindowInsets(0, 0, 0, 0)
+    ) {
+        items.forEachIndexed { index, label ->
+            val isSelected = selectedTab == index
+
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(horizontal = 2.dp, vertical = 4.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .clickable { onTabSelected(index) },
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = when (label) {
+                            "Home" -> "📊"
+                            "Store", "Tienda" -> "🛒"
+                            "Clientes", "Alumnos" -> "👥"
+                            "Profesores" -> "👨‍🏫"
+                            "Horarios", "Clases" -> "📅"
+                            "Rutinas" -> "🏋️"
+                            "Chat" -> "💬"
+                            else -> "⚙️"
+                        },
+                        fontSize = 18.sp
+                    )
+                    Text(
+                        text = label,
+                        fontSize = 8.sp,
+                        color = if (isSelected) PrimaryTurquoise else TextGray,
+                        maxLines = 1
+                    )
+                }
+            }
         }
     }
 }

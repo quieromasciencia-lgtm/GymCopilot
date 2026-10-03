@@ -3,7 +3,7 @@ package com.zexo.gymcopilot.repository
 import android.util.Log
 import com.google.gson.JsonArray
 import com.zexo.gymcopilot.DataStoreManager
-import com.zexo.gymcopilot.model.ScheduleEntry
+import com.zexo.gymcopilot.ScheduleEntry
 import com.zexo.gymcopilot.network.GymApiService
 import com.zexo.gymcopilot.network.NetworkModule
 import com.zexo.gymcopilot.network.ScheduleSyncRequest

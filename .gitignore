@@ -18,4 +18,3 @@ local.properties
 /shared/build/
 .kotlin/
 .artifacts/
-kotlin-js-store/

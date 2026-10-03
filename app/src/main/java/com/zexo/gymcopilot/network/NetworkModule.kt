@@ -20,10 +20,20 @@ object NetworkModule {
         chain.proceed(requestWithUserAgent)
     }
 
+    /**
+     * Interceptor de redirecciones "quirúrgico":
+     * - Si la redirección apunta a un servidor de Apps Script (script.google.com,
+     *   script.googleusercontent.com), se sigue con GET, tal como exige el flujo
+     *   de ejecución de Web Apps de Apps Script.
+     * - Para cualquier otro destino (Drive, otras APIs de Google), se conserva
+     *   el método y el cuerpo originales de la petición, evitando los 403
+     *   ("Servicio Deshabilitado") que aparecían al forzar POST en todas partes.
+     */
     private val postRedirectInterceptor = okhttp3.Interceptor { chain ->
         val originalRequest = chain.request()
         var response = chain.proceed(originalRequest)
 
+        // Seguimos hasta 5 redirecciones
         var redirectCount = 0
         while ((response.code == 301 || response.code == 302 || response.code == 303 || response.code == 307 || response.code == 308)
             && redirectCount < 5
@@ -38,11 +48,13 @@ object NetworkModule {
                     locationHost.contains("googleusercontent.com", ignoreCase = true)
 
             val redirectedRequest = if (isAppsScriptRedirect) {
+                // Apps Script: la redirección de ejecución debe seguirse con GET.
                 originalRequest.newBuilder()
                     .url(location)
                     .get()
                     .build()
             } else {
+                // Drive y otras APIs: mantener el método y el cuerpo originales.
                 originalRequest.newBuilder()
                     .url(location)
                     .method(originalRequest.method, originalRequest.body)

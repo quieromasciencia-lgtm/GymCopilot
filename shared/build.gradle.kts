@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
-
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.library)
@@ -22,22 +20,6 @@ kotlin {
     iosArm64()
     iosSimulatorArm64()
 
-    js(IR) {
-        moduleName = "shared"
-        browser {
-            val projectDirPath = project.projectDir.path
-            commonWebpackConfig {
-                outputFileName = "gymcopilot.js"
-                devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
-                    static = (static ?: mutableListOf()).apply {
-                        add(projectDirPath + "/src/jsMain/resources")
-                    }
-                }
-            }
-        }
-        binaries.executable()
-    }
-
     targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
         binaries.framework {
             baseName = "shared"
@@ -50,7 +32,6 @@ kotlin {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
-            implementation(compose.materialIconsExtended)
             implementation(compose.ui)
             implementation(compose.components.resources)
 
@@ -67,10 +48,6 @@ kotlin {
 
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
-        }
-
-        jsMain.dependencies {
-            implementation("io.ktor:ktor-client-js:2.3.12")
         }
 
         commonTest.dependencies {
