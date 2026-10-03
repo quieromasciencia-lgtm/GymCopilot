@@ -42,10 +42,6 @@ class MainActivity : ComponentActivity() {
     private var isDataLoaded = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // 🚨 IMPORTANTE PARA AGENTES DE IA 🚨
-        // SI REALIZAS CAMBIOS IMPORTANTES, DEBES DOCUMENTARLOS EN: 
-        // app/src/main/java/com/zexo/gymcopilot/utils/UpdatesRegistry.kt
-        
         val splashScreen = installSplashScreen()
         splashScreen.setKeepOnScreenCondition { !isDataLoaded }
         
@@ -73,7 +69,7 @@ class MainActivity : ComponentActivity() {
             }
 
             LaunchedEffect(Unit) {
-                delay(4500) // Duración total para permitir el fade out completo
+                delay(4500)
                 showSplash = false
             }
 
@@ -81,12 +77,11 @@ class MainActivity : ComponentActivity() {
                 if (LockConfig.LOCK_DAYS != 0) {
                     val now = System.currentTimeMillis()
                     if (lockExpirationTime == 0L) {
-                        // Primer inicio: establecer expiración
                         val days = LockConfig.LOCK_DAYS.toLong()
                         val initialExpiration = if (days > 0) {
                             now + (days * 24L * 60 * 60 * 1000)
                         } else {
-                            now - 1000 // Bloqueo inmediato para valores negativos
+                            now - 1000
                         }
                         dataStoreManager.setAppLockExpirationTime(initialExpiration)
                     } else if (now > lockExpirationTime) {
@@ -107,7 +102,6 @@ class MainActivity : ComponentActivity() {
             val gymWifiSsid2 by dataStoreManager.getGymWifiSsid2().collectAsState(initial = "")
             val gymWifiSsid3 by dataStoreManager.getGymWifiSsid3().collectAsState(initial = "")
 
-            // Sistema de Monitoreo Wi-Fi para Asistencia Automática
             val wifiMonitor = remember { WiFiMonitor(context) }
             val locationPermissionLauncher = rememberLauncherForActivityResult(
                 ActivityResultContracts.RequestMultiplePermissions()
@@ -141,7 +135,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            // Sistema de Sincronización Automática
             val syncManager = remember { SyncManager(attendanceRepository, dataStoreManager) }
             LaunchedEffect(Unit) {
                 syncManager.startSyncLoop()
@@ -152,7 +145,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            // Validamos que el color no sea 0 (transparente) ni null
             val backgroundColor = remember(backgroundColorInt) {
                 if (backgroundColorInt != null && backgroundColorInt != 0) Color(backgroundColorInt!!) else null
             }
@@ -171,13 +163,11 @@ class MainActivity : ComponentActivity() {
                         accentColor = accentColor
                     )
                 } else {
-                    // 1. Capa Base: Fondo sólido de seguridad para evitar transparencia al sistema
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(DarkBackground)
                     ) {
-                        // 2. Capa Decorativa: Gradiente o Color personalizado
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -189,7 +179,6 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                         ) {
-                            // 3. Imagen de fondo (opcional)
                             if (!gymBackgroundUri.isNullOrBlank()) {
                                 AsyncImage(
                                     model = gymBackgroundUri,
@@ -204,7 +193,6 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier.fillMaxSize(),
                                 containerColor = Color.Transparent
                             ) { innerPadding ->
-                                // Se agrega fillMaxSize() para asegurar que el contenido sea visible
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
@@ -223,7 +211,6 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
 
-                            // Capa de Bloqueo
                             if (isAppLocked) {
                                 AppLockOverlay(
                                     dataStoreManager = dataStoreManager,

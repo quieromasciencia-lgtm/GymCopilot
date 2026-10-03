@@ -5,7 +5,17 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class DataStoreManager {
+typealias Member = com.zexo.gymcopilot.model.Member
+typealias Professor = com.zexo.gymcopilot.model.Professor
+typealias Exercise = com.zexo.gymcopilot.model.Exercise
+typealias Routine = com.zexo.gymcopilot.model.Routine
+typealias ScheduleEntry = com.zexo.gymcopilot.model.ScheduleEntry
+typealias ChatMessage = com.zexo.gymcopilot.model.ChatMessage
+typealias PaymentRecord = com.zexo.gymcopilot.model.PaymentRecord
+typealias Product = com.zexo.gymcopilot.model.Product
+typealias SubscriptionPlan = com.zexo.gymcopilot.model.SubscriptionPlan
+
+class DataStoreManager(context: Any? = null) {
 
     private val _appLanguage = MutableStateFlow("Español")
     fun getAppLanguage(): Flow<String> = _appLanguage.asStateFlow()
@@ -22,6 +32,14 @@ class DataStoreManager {
     private val _userRole = MutableStateFlow<String?>("admin")
     fun getUserRole(): Flow<String?> = _userRole.asStateFlow()
     suspend fun setUserRole(role: String) { _userRole.value = role }
+
+    private val _linkedProfessorId = MutableStateFlow<String?>(null)
+    fun getLinkedProfessorId(): Flow<String?> = _linkedProfessorId.asStateFlow()
+    suspend fun setLinkedProfessorId(id: String) { _linkedProfessorId.value = id }
+
+    private val _linkedMemberEmail = MutableStateFlow<String?>(null)
+    fun getLinkedMemberEmail(): Flow<String?> = _linkedMemberEmail.asStateFlow()
+    suspend fun setLinkedMemberEmail(email: String) { _linkedMemberEmail.value = email }
 
     private val _userName = MutableStateFlow("Admin")
     fun getUserName(): Flow<String> = _userName.asStateFlow()
@@ -63,6 +81,31 @@ class DataStoreManager {
     fun getGymNameFont(): Flow<String> = _gymNameFont.asStateFlow()
     suspend fun setGymNameFont(font: String) { _gymNameFont.value = font }
 
+    private val _gymPhone = MutableStateFlow("")
+    fun getGymPhone(): Flow<String> = _gymPhone.asStateFlow()
+    suspend fun setGymPhone(phone: String) { _gymPhone.value = phone }
+
+    private val _gymAddress = MutableStateFlow("")
+    fun getGymAddress(): Flow<String> = _gymAddress.asStateFlow()
+    suspend fun setGymAddress(addr: String) { _gymAddress.value = addr }
+
+    private val _gymCity = MutableStateFlow("")
+    fun getGymCity(): Flow<String> = _gymCity.asStateFlow()
+    suspend fun setGymCity(city: String) { _gymCity.value = city }
+
+    private val _gymPostalCode = MutableStateFlow("")
+    fun getGymPostalCode(): Flow<String> = _gymPostalCode.asStateFlow()
+    suspend fun setGymPostalCode(code: String) { _gymPostalCode.value = code }
+
+    private val _gymCountry = MutableStateFlow("")
+    fun getGymCountry(): Flow<String> = _gymCountry.asStateFlow()
+    suspend fun setGymCountry(country: String) { _gymCountry.value = country }
+
+    private val _gymBackgroundUri = MutableStateFlow<String?>(null)
+    fun getGymBackgroundUri(): Flow<String?> = _gymBackgroundUri.asStateFlow()
+    suspend fun setGymBackgroundUri(uri: String) { _gymBackgroundUri.value = uri }
+    suspend fun clearGymBackgroundUri() { _gymBackgroundUri.value = null }
+
     private val _showLogoBorder = MutableStateFlow(true)
     fun getShowLogoBorder(): Flow<Boolean> = _showLogoBorder.asStateFlow()
     suspend fun setShowLogoBorder(show: Boolean) { _showLogoBorder.value = show }
@@ -78,6 +121,7 @@ class DataStoreManager {
     private val _backgroundColor = MutableStateFlow<Int?>(null)
     fun getBackgroundColor(): Flow<Int?> = _backgroundColor.asStateFlow()
     suspend fun setBackgroundColor(color: Int) { _backgroundColor.value = color }
+    suspend fun resetBackgroundColor() { _backgroundColor.value = null }
 
     private val _broadcastMessage = MutableStateFlow("Hoy abrimos a las 8:00 AM")
     fun getBroadcastMessage(): Flow<String> = _broadcastMessage.asStateFlow()
@@ -87,21 +131,21 @@ class DataStoreManager {
     fun getGymIsOpen(): Flow<Boolean> = _gymIsOpen.asStateFlow()
     suspend fun setGymIsOpen(open: Boolean) { _gymIsOpen.value = open }
 
+    private val _classInSessionManual = MutableStateFlow(false)
+    fun getClassInSessionManual(): Flow<Boolean> = _classInSessionManual.asStateFlow()
+    suspend fun setClassInSessionManual(inSession: Boolean) { _classInSessionManual.value = inSession }
+
     private val _assistantEnabled = MutableStateFlow(false)
     fun getAssistantEnabled(): Flow<Boolean> = _assistantEnabled.asStateFlow()
     suspend fun setAssistantEnabled(enabled: Boolean) { _assistantEnabled.value = enabled }
 
-    private val _gymApiUrl = MutableStateFlow("")
-    fun getGymApiUrl(): Flow<String> = _gymApiUrl.asStateFlow()
-    suspend fun setGymApiUrl(url: String) { _gymApiUrl.value = url }
+    private val _settingsTourSkinDismissed = MutableStateFlow(true)
+    fun getSettingsTourSkinDismissed(): Flow<Boolean> = _settingsTourSkinDismissed.asStateFlow()
+    suspend fun setSettingsTourSkinDismissed(d: Boolean) { _settingsTourSkinDismissed.value = d }
 
-    private val _googleAccessToken = MutableStateFlow("")
-    fun getGoogleAccessToken(): Flow<String> = _googleAccessToken.asStateFlow()
-    suspend fun setGoogleAccessToken(token: String) { _googleAccessToken.value = token }
-
-    private val _authToken = MutableStateFlow<String?>("session_active")
-    fun getAuthToken(): Flow<String?> = _authToken.asStateFlow()
-    suspend fun setAuthToken(token: String) { _authToken.value = token }
+    private val _appearanceTourDismissed = MutableStateFlow(true)
+    fun getAppearanceTourDismissed(): Flow<Boolean> = _appearanceTourDismissed.asStateFlow()
+    suspend fun setAppearanceTourDismissed(d: Boolean) { _appearanceTourDismissed.value = d }
 
     private val _welcomeDismissed = MutableStateFlow(true)
     fun getWelcomeDismissed(): Flow<Boolean> = _welcomeDismissed.asStateFlow()
@@ -131,57 +175,83 @@ class DataStoreManager {
     fun getDashboardTourStep1CentralDismissed(): Flow<Boolean> = _dashboardTourStep1CentralDismissed.asStateFlow()
     suspend fun setDashboardTourStep1CentralDismissed(d: Boolean) { _dashboardTourStep1CentralDismissed.value = d }
 
-    private val _dashboardTourBroadcastDismissed = MutableStateFlow(true)
-    fun getDashboardTourBroadcastDismissed(): Flow<Boolean> = _dashboardTourBroadcastDismissed.asStateFlow()
-    suspend fun setDashboardTourBroadcastDismissed(d: Boolean) { _dashboardTourBroadcastDismissed.value = d }
+    private val _gymApiUrl = MutableStateFlow("")
+    fun getGymApiUrl(): Flow<String> = _gymApiUrl.asStateFlow()
+    suspend fun setGymApiUrl(url: String) { _gymApiUrl.value = url }
 
-    private val _dashboardTourPlansDismissed = MutableStateFlow(true)
-    fun getDashboardTourPlansDismissed(): Flow<Boolean> = _dashboardTourPlansDismissed.asStateFlow()
-    suspend fun setDashboardTourPlansDismissed(d: Boolean) { _dashboardTourPlansDismissed.value = d }
+    private val _gymScriptId = MutableStateFlow("")
+    fun getGymScriptId(): Flow<String> = _gymScriptId.asStateFlow()
+    suspend fun setGymScriptId(id: String) { _gymScriptId.value = id }
 
-    private val _dashboardTourIncomeDismissed = MutableStateFlow(true)
-    fun getDashboardTourIncomeDismissed(): Flow<Boolean> = _dashboardTourIncomeDismissed.asStateFlow()
-    suspend fun setDashboardTourIncomeDismissed(d: Boolean) { _dashboardTourIncomeDismissed.value = d }
+    private val _googleAccessToken = MutableStateFlow("")
+    fun getGoogleAccessToken(): Flow<String> = _googleAccessToken.asStateFlow()
+    suspend fun setGoogleAccessToken(token: String) { _googleAccessToken.value = token }
 
-    private val _dashboardTourMetricsDismissed = MutableStateFlow(true)
-    fun getDashboardTourMetricsDismissed(): Flow<Boolean> = _dashboardTourMetricsDismissed.asStateFlow()
-    suspend fun setDashboardTourMetricsDismissed(d: Boolean) { _dashboardTourMetricsDismissed.value = d }
+    private val _authToken = MutableStateFlow<String?>("session_active")
+    fun getAuthToken(): Flow<String?> = _authToken.asStateFlow()
+    suspend fun setAuthToken(token: String) { _authToken.value = token }
 
-    private val _dashboardTourScheduleDismissed = MutableStateFlow(true)
-    fun getDashboardTourScheduleDismissed(): Flow<Boolean> = _dashboardTourScheduleDismissed.asStateFlow()
-    suspend fun setDashboardTourScheduleDismissed(d: Boolean) { _dashboardTourScheduleDismissed.value = d }
+    private val _appLockExpirationTime = MutableStateFlow(0L)
+    fun getAppLockExpirationTime(): Flow<Long> = _appLockExpirationTime.asStateFlow()
+    suspend fun setAppLockExpirationTime(t: Long) { _appLockExpirationTime.value = t }
 
-    private val _dashboardTourQrDismissed = MutableStateFlow(true)
-    fun getDashboardTourQrDismissed(): Flow<Boolean> = _dashboardTourQrDismissed.asStateFlow()
-    suspend fun setDashboardTourQrDismissed(d: Boolean) { _dashboardTourQrDismissed.value = d }
+    private val _gymWifiSsid = MutableStateFlow("")
+    fun getGymWifiSsid(): Flow<String> = _gymWifiSsid.asStateFlow()
+    suspend fun setGymWifiSsid(ssid: String) { _gymWifiSsid.value = ssid }
 
-    private val _dashboardTourProfessorsDismissed = MutableStateFlow(true)
-    fun getDashboardTourProfessorsDismissed(): Flow<Boolean> = _dashboardTourProfessorsDismissed.asStateFlow()
-    suspend fun setDashboardTourProfessorsDismissed(d: Boolean) { _dashboardTourProfessorsDismissed.value = d }
+    private val _gymWifiSsid2 = MutableStateFlow("")
+    fun getGymWifiSsid2(): Flow<String> = _gymWifiSsid2.asStateFlow()
+    suspend fun setGymWifiSsid2(ssid: String) { _gymWifiSsid2.value = ssid }
 
-    private val _dashboardTourMembersNavDismissed = MutableStateFlow(true)
-    fun getDashboardTourMembersNavDismissed(): Flow<Boolean> = _dashboardTourMembersNavDismissed.asStateFlow()
-    suspend fun setDashboardTourMembersNavDismissed(d: Boolean) { _dashboardTourMembersNavDismissed.value = d }
+    private val _gymWifiSsid3 = MutableStateFlow("")
+    fun getGymWifiSsid3(): Flow<String> = _gymWifiSsid3.asStateFlow()
+    suspend fun setGymWifiSsid3(ssid: String) { _gymWifiSsid3.value = ssid }
 
-    private val _dashboardTourStoreNavDismissed = MutableStateFlow(true)
-    fun getDashboardTourStoreNavDismissed(): Flow<Boolean> = _dashboardTourStoreNavDismissed.asStateFlow()
-    suspend fun setDashboardTourStoreNavDismissed(d: Boolean) { _dashboardTourStoreNavDismissed.value = d }
+    private val _lastWifiCheckinDate = MutableStateFlow("")
+    fun getLastWifiCheckinDate(): Flow<String> = _lastWifiCheckinDate.asStateFlow()
+    suspend fun setLastWifiCheckinDate(date: String) { _lastWifiCheckinDate.value = date }
 
     private val _shortcutCreated = MutableStateFlow(false)
     fun isShortcutCreated(): Flow<Boolean> = _shortcutCreated.asStateFlow()
     suspend fun setShortcutCreated(c: Boolean) { _shortcutCreated.value = c }
 
-    private val _lastShortcutName = MutableStateFlow("")
-    fun getLastShortcutName(): Flow<String> = _lastShortcutName.asStateFlow()
-    suspend fun setLastShortcutName(n: String) { _lastShortcutName.value = n }
+    private val _storeCategories = MutableStateFlow<Set<String>>(
+        setOf("EQUIPMENT", "CLOTHING", "NUTRITION", "WELLNESS", "DIGITAL", "TECH")
+    )
+    fun getStoreCategories(): Flow<Set<String>> = _storeCategories.asStateFlow()
+    suspend fun setStoreCategories(cats: Set<String>) { _storeCategories.value = cats }
 
-    private val _lastShortcutLogoUri = MutableStateFlow("")
-    fun getLastShortcutLogoUri(): Flow<String> = _lastShortcutLogoUri.asStateFlow()
-    suspend fun setLastShortcutLogoUri(u: String) { _lastShortcutLogoUri.value = u }
+    private val _customCategoryIds = MutableStateFlow<Set<String>>(emptySet())
+    fun getCustomCategoryIds(): Flow<Set<String>> = _customCategoryIds.asStateFlow()
+    suspend fun setCustomCategoryIds(ids: Set<String>) { _customCategoryIds.value = ids }
 
-    private val _appLockExpirationTime = MutableStateFlow(0L)
-    fun getAppLockExpirationTime(): Flow<Long> = _appLockExpirationTime.asStateFlow()
-    suspend fun setAppLockExpirationTime(t: Long) { _appLockExpirationTime.value = t }
+    private val _lastSelectedCategory = MutableStateFlow<String?>("EQUIPMENT")
+    fun getLastSelectedCategory(): Flow<String?> = _lastSelectedCategory.asStateFlow()
+    suspend fun setLastSelectedCategory(id: String) { _lastSelectedCategory.value = id }
+
+    private val _preferredContactMethod = MutableStateFlow("whatsapp")
+    fun getPreferredContactMethod(): Flow<String> = _preferredContactMethod.asStateFlow()
+    suspend fun setPreferredContactMethod(m: String) { _preferredContactMethod.value = m }
+
+    private val _contactPhone = MutableStateFlow("")
+    fun getContactPhone(): Flow<String> = _contactPhone.asStateFlow()
+    suspend fun setContactPhone(phone: String) { _contactPhone.value = phone }
+
+    private val _storeAnnouncement = MutableStateFlow("🔥 ¡Ofertas relámpago esta semana en la tienda!")
+    fun getStoreAnnouncement(): Flow<String> = _storeAnnouncement.asStateFlow()
+    suspend fun setStoreAnnouncement(msg: String) { _storeAnnouncement.value = msg }
+
+    private val _cartItems = MutableStateFlow<List<Product>>(emptyList())
+    fun getCartItems(): Flow<List<Product>> = _cartItems.asStateFlow()
+    suspend fun addToCart(p: Product) { _cartItems.value = _cartItems.value + p }
+    suspend fun removeFromCart(id: String) { _cartItems.value = _cartItems.value.filter { it.id != id } }
+    suspend fun clearCart() { _cartItems.value = emptyList() }
+
+    private val _lastReadTimestamps = MutableStateFlow<Map<String, Long>>(emptyMap())
+    fun getLastReadTimestamp(key: String): Flow<Long> = MutableStateFlow(_lastReadTimestamps.value[key] ?: 0L).asStateFlow()
+    suspend fun setLastReadTimestamp(key: String, ts: Long) {
+        _lastReadTimestamps.value = _lastReadTimestamps.value + (key to ts)
+    }
 
     private val _categoryNameMap = MutableStateFlow<Map<String, String>>(emptyMap())
     fun getCategoryName(id: String): Flow<String?> = MutableStateFlow(_categoryNameMap.value[id]).asStateFlow()
@@ -193,6 +263,27 @@ class DataStoreManager {
     fun getCategoryColor(id: String): Flow<Int?> = MutableStateFlow(_categoryColorMap.value[id]).asStateFlow()
     suspend fun setCategoryColor(id: String, color: Int) {
         _categoryColorMap.value = _categoryColorMap.value + (id to color)
+    }
+
+    private val _categoryUriMap = MutableStateFlow<Map<String, String>>(emptyMap())
+    fun getCategoryUri(id: String): Flow<String?> = MutableStateFlow(_categoryUriMap.value[id]).asStateFlow()
+    suspend fun setCategoryUri(id: String, uri: String) {
+        _categoryUriMap.value = _categoryUriMap.value + (id to uri)
+    }
+
+    suspend fun resetCategory(id: String) {
+        _categoryNameMap.value = _categoryNameMap.value - id
+        _categoryColorMap.value = _categoryColorMap.value - id
+        _categoryUriMap.value = _categoryUriMap.value - id
+    }
+
+    private val _chatCacheMap = MutableStateFlow<Map<String, List<ChatMessage>>>(emptyMap())
+    fun getChatCache(chatKey: String): Flow<List<ChatMessage>> = MutableStateFlow(_chatCacheMap.value[chatKey] ?: emptyList()).asStateFlow()
+    suspend fun saveChatCache(chatKey: String, messages: List<ChatMessage>) {
+        _chatCacheMap.value = _chatCacheMap.value + (chatKey to messages.filter { !it.isPending })
+    }
+    suspend fun clearChatCache(chatKey: String) {
+        _chatCacheMap.value = _chatCacheMap.value - chatKey
     }
 
     private val _members = MutableStateFlow<List<Member>>(
@@ -209,6 +300,7 @@ class DataStoreManager {
     }
     suspend fun addMember(member: Member) { _members.value = _members.value + member }
     suspend fun removeMember(email: String) { _members.value = _members.value.filter { it.email != email } }
+    suspend fun saveMembers(members: List<Member>) { _members.value = members }
 
     private val _professors = MutableStateFlow<List<Professor>>(
         listOf(
@@ -218,6 +310,11 @@ class DataStoreManager {
         )
     )
     fun getProfessors(): Flow<List<Professor>> = _professors.asStateFlow()
+    suspend fun updateProfessor(prof: Professor) {
+        _professors.value = _professors.value.map { if (it.id == prof.id) prof else it }
+    }
+    suspend fun removeProfessor(id: String) { _professors.value = _professors.value.filter { it.id != id } }
+    suspend fun saveProfessors(profs: List<Professor>) { _professors.value = profs }
 
     private val _products = MutableStateFlow<List<Product>>(
         listOf(
@@ -229,6 +326,10 @@ class DataStoreManager {
         )
     )
     fun getProducts(): Flow<List<Product>> = _products.asStateFlow()
+    suspend fun addProduct(product: Product) { _products.value = _products.value + product }
+    suspend fun updateProduct(product: Product) { _products.value = _products.value.map { if (it.id == product.id) product else it } }
+    suspend fun deleteProduct(id: String) { _products.value = _products.value.filter { it.id != id } }
+    suspend fun saveAllProducts(products: List<Product>) { _products.value = products }
 
     private val _routines = MutableStateFlow<List<Routine>>(
         listOf(
@@ -237,7 +338,32 @@ class DataStoreManager {
         )
     )
     fun getRoutines(): Flow<List<Routine>> = _routines.asStateFlow()
+    suspend fun addRoutine(routine: Routine) { _routines.value = _routines.value + routine }
+    suspend fun updateRoutine(routine: Routine) {
+        _routines.value = _routines.value.map { if (it.id == routine.id) routine else it }
+    }
+    suspend fun deleteRoutine(id: String) { _routines.value = _routines.value.filter { it.id != id } }
+    suspend fun saveRoutines(routines: List<Routine>) { _routines.value = routines }
+
+    private val _subscriptionPlans = MutableStateFlow<List<SubscriptionPlan>>(
+        listOf(
+            SubscriptionPlan("1", "Pase Libre Gold", 35000.0, 30, "Acceso ilimitado a todas las instalaciones"),
+            SubscriptionPlan("2", "Musculación 3x", 25000.0, 30, "Acceso 3 veces por semana")
+        )
+    )
+    fun getSubscriptionPlans(): Flow<List<SubscriptionPlan>> = _subscriptionPlans.asStateFlow()
+    suspend fun saveSubscriptionPlans(plans: List<SubscriptionPlan>) { _subscriptionPlans.value = plans }
 
     private val _paymentRecords = MutableStateFlow<List<PaymentRecord>>(emptyList())
     fun getPaymentRecords(): Flow<List<PaymentRecord>> = _paymentRecords.asStateFlow()
+    suspend fun addPaymentRecord(record: PaymentRecord) { _paymentRecords.value = _paymentRecords.value + record }
+
+    private val _professorSchedules = MutableStateFlow<Map<String, List<ScheduleEntry>>>(emptyMap())
+    fun getProfessorSchedules(): Flow<Map<String, List<ScheduleEntry>>> = _professorSchedules.asStateFlow()
+    suspend fun saveProfessorSchedule(professorId: String, schedules: List<ScheduleEntry>) {
+        _professorSchedules.value = _professorSchedules.value + (professorId to schedules)
+    }
+    suspend fun saveAllSchedules(schedules: Map<String, List<ScheduleEntry>>) {
+        _professorSchedules.value = schedules
+    }
 }

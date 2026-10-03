@@ -18,7 +18,13 @@ import kotlinx.coroutines.delay
 enum class AppScreenState {
     SPLASH,
     LOGIN,
-    MAIN_APP
+    ADMIN_DASHBOARD,
+    MEMBER_DASHBOARD,
+    PROFESSOR_DASHBOARD,
+    MEMBERS,
+    STORE,
+    PUBLIC_STORE,
+    ROUTINES
 }
 
 @Composable
@@ -29,6 +35,7 @@ fun SharedGymCopilotApp(
     val dataStoreManager = remember { DataStoreManager() }
     var screenState by remember { mutableStateOf(AppScreenState.SPLASH) }
     var currentRole by remember { mutableStateOf(initialRole.lowercase()) }
+    var selectedCategoryId by remember { mutableStateOf("EQUIPMENT") }
 
     GymCopilotTheme {
         Box(
@@ -47,26 +54,125 @@ fun SharedGymCopilotApp(
                     LoginScreen(
                         onRoleSelected = { selectedRole ->
                             currentRole = selectedRole
-                            screenState = AppScreenState.MAIN_APP
+                            screenState = when (selectedRole) {
+                                "admin" -> AppScreenState.ADMIN_DASHBOARD
+                                "professor", "profesor" -> AppScreenState.PROFESSOR_DASHBOARD
+                                else -> AppScreenState.MEMBER_DASHBOARD
+                            }
                         },
                         dataStoreManager = dataStoreManager
                     )
                 }
-                AppScreenState.MAIN_APP -> {
-                    when (currentRole) {
-                        "admin" -> AdminDashboardScreen(
-                            onAppSettingsClick = { screenState = AppScreenState.LOGIN },
-                            dataStoreManager = dataStoreManager
-                        )
-                        "profesor", "professor" -> ProfessorDashboardScreen(
-                            onProfileClick = { screenState = AppScreenState.LOGIN },
-                            dataStoreManager = dataStoreManager
-                        )
-                        else -> MemberDashboardScreen(
-                            onProfileClick = { screenState = AppScreenState.LOGIN },
-                            dataStoreManager = dataStoreManager
-                        )
-                    }
+                AppScreenState.ADMIN_DASHBOARD -> {
+                    AdminDashboardScreen(
+                        onAppSettingsClick = { screenState = AppScreenState.LOGIN },
+                        onStoreClick = { screenState = AppScreenState.STORE },
+                        onMembersClick = { screenState = AppScreenState.MEMBERS },
+                        onProfessorsClick = { screenState = AppScreenState.MEMBERS },
+                        onScheduleClick = { screenState = AppScreenState.ROUTINES },
+                        dataStoreManager = dataStoreManager
+                    )
+                }
+                AppScreenState.PROFESSOR_DASHBOARD -> {
+                    ProfessorDashboardScreen(
+                        onHomeClick = { screenState = AppScreenState.PROFESSOR_DASHBOARD },
+                        onStoreClick = { screenState = AppScreenState.PUBLIC_STORE },
+                        onMembersClick = { screenState = AppScreenState.MEMBERS },
+                        onRoutinesClick = { screenState = AppScreenState.ROUTINES },
+                        onProfileClick = { screenState = AppScreenState.LOGIN },
+                        dataStoreManager = dataStoreManager
+                    )
+                }
+                AppScreenState.MEMBER_DASHBOARD -> {
+                    MemberDashboardScreen(
+                        onHomeClick = { screenState = AppScreenState.MEMBER_DASHBOARD },
+                        onStoreClick = { screenState = AppScreenState.PUBLIC_STORE },
+                        onRoutinesClick = { screenState = AppScreenState.ROUTINES },
+                        onProfileClick = { screenState = AppScreenState.LOGIN },
+                        dataStoreManager = dataStoreManager
+                    )
+                }
+                AppScreenState.MEMBERS -> {
+                    MembersScreen(
+                        onBack = {
+                            screenState = when (currentRole) {
+                                "admin" -> AppScreenState.ADMIN_DASHBOARD
+                                "professor", "profesor" -> AppScreenState.PROFESSOR_DASHBOARD
+                                else -> AppScreenState.MEMBER_DASHBOARD
+                            }
+                        },
+                        onHomeClick = {
+                            screenState = when (currentRole) {
+                                "admin" -> AppScreenState.ADMIN_DASHBOARD
+                                "professor", "profesor" -> AppScreenState.PROFESSOR_DASHBOARD
+                                else -> AppScreenState.MEMBER_DASHBOARD
+                            }
+                        },
+                        onStoreClick = { screenState = AppScreenState.STORE },
+                        onSettingsClick = { screenState = AppScreenState.LOGIN },
+                        isAdmin = currentRole == "admin",
+                        isProfessor = currentRole == "professor" || currentRole == "profesor",
+                        dataStoreManager = dataStoreManager
+                    )
+                }
+                AppScreenState.STORE -> {
+                    StoreScreen(
+                        onBack = { screenState = AppScreenState.ADMIN_DASHBOARD },
+                        onHomeClick = { screenState = AppScreenState.ADMIN_DASHBOARD },
+                        onStoreClick = { screenState = AppScreenState.STORE },
+                        onMembersClick = { screenState = AppScreenState.MEMBERS },
+                        onViewPublicStoreClick = { screenState = AppScreenState.PUBLIC_STORE },
+                        onCategoryClick = { catId ->
+                            selectedCategoryId = catId
+                            screenState = AppScreenState.PUBLIC_STORE
+                        },
+                        dataStoreManager = dataStoreManager
+                    )
+                }
+                AppScreenState.PUBLIC_STORE -> {
+                    PublicStoreScreen(
+                        onBack = {
+                            screenState = when (currentRole) {
+                                "admin" -> AppScreenState.STORE
+                                "professor", "profesor" -> AppScreenState.PROFESSOR_DASHBOARD
+                                else -> AppScreenState.MEMBER_DASHBOARD
+                            }
+                        },
+                        onHomeClick = {
+                            screenState = when (currentRole) {
+                                "admin" -> AppScreenState.ADMIN_DASHBOARD
+                                "professor", "profesor" -> AppScreenState.PROFESSOR_DASHBOARD
+                                else -> AppScreenState.MEMBER_DASHBOARD
+                            }
+                        },
+                        onStoreClick = {
+                            screenState = if (currentRole == "admin") AppScreenState.STORE else AppScreenState.PUBLIC_STORE
+                        },
+                        onCategoryClick = { catId -> selectedCategoryId = catId },
+                        isMember = currentRole == "member",
+                        isProfessor = currentRole == "professor" || currentRole == "profesor",
+                        dataStoreManager = dataStoreManager
+                    )
+                }
+                AppScreenState.ROUTINES -> {
+                    RoutineDashboardScreen(
+                        onBack = {
+                            screenState = when (currentRole) {
+                                "admin" -> AppScreenState.ADMIN_DASHBOARD
+                                "professor", "profesor" -> AppScreenState.PROFESSOR_DASHBOARD
+                                else -> AppScreenState.MEMBER_DASHBOARD
+                            }
+                        },
+                        onHomeClick = {
+                            screenState = when (currentRole) {
+                                "admin" -> AppScreenState.ADMIN_DASHBOARD
+                                "professor", "profesor" -> AppScreenState.PROFESSOR_DASHBOARD
+                                else -> AppScreenState.MEMBER_DASHBOARD
+                            }
+                        },
+                        onStoreClick = { screenState = AppScreenState.PUBLIC_STORE },
+                        dataStoreManager = dataStoreManager
+                    )
                 }
             }
         }
